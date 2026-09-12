@@ -1,0 +1,277 @@
+// cover some element-ui styles
+
+.el-breadcrumb__inner,
+.el-breadcrumb__inner a {
+  font-weight: 400 !important;
+}
+
+.el-upload {
+  input[type="file"] {
+    display: none !important;
+  }
+}
+
+.el-upload__input {
+  display: none;
+}
+
+.cell {
+  .el-tag {
+    margin-right: 0px;
+  }
+}
+
+.small-padding {
+  .cell {
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+}
+
+.fixed-width {
+  .el-button--small {
+    padding: 7px 10px;
+    width: 60px;
+  }
+}
+
+.status-col {
+  .cell {
+    padding: 0 10px;
+    text-align: center;
+
+    .el-tag {
+      margin-right: 0px;
+    }
+  }
+}
+
+// to fixed https://github.com/ElemeFE/element/issues/2461
+.el-dialog {
+  transform: none;
+  left: 0;
+  position: relative;
+  margin: 0 auto;
+}
+
+// refine element ui upload
+.upload-container {
+  .el-upload {
+    width: 100%;
+
+    .el-upload-dragger {
+      width: 100%;
+      height: 200px;
+    }
+  }
+}
+
+// dropdown
+.el-dropdown-menu {
+  a {
+    display: block
+  }
+}
+
+// fix date-picker ui bug in filter-item
+.el-range-editor.el-input__inner {
+  display: inline-flex !important;
+}
+
+// ---------------------------------------------------------------------------
+// 2026-09 全局视觉刷新：与登录页深海军蓝/青色体系统一
+// ---------------------------------------------------------------------------
+
+// 按钮统一圆角与手感
+.el-button {
+  border-radius: 8px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:not(.is-disabled):hover {
+    transform: translateY(-1px);
+  }
+}
+
+// 主按钮换新配色（青→蓝，呼应登录页）
+.el-button--primary {
+  background: #2f7fd1;
+  border-color: #2f7fd1;
+
+  &:hover,
+  &:focus {
+    background: #4a93de;
+    border-color: #4a93de;
+  }
+}
+
+// 表格：表头底色、行悬停、圆角容器
+.el-table {
+  border-radius: 10px;
+
+  th.el-table__cell {
+    background: #f0f5fb !important;
+    color: #24405e;
+    font-weight: 600;
+  }
+
+  td.el-table__cell,
+  th.el-table__cell.is-leaf {
+    border-bottom: 1px solid #e8eef6;
+  }
+
+  .el-table__row:hover > td.el-table__cell {
+    background: #f2f9ff !important;
+  }
+}
+
+// 卡片与对话框圆角化
+.el-card {
+  border-radius: 12px;
+  border: 1px solid #e6ecf4;
+  box-shadow: 0 2px 12px rgba(24, 48, 84, 0.06) !important;
+}
+
+.el-dialog {
+  border-radius: 14px;
+  overflow: hidden;
+
+  .el-dialog__header {
+    background: #f7fafd;
+    margin-right: 0;
+    padding: 16px 20px;
+  }
+
+  .el-dialog__title {
+    font-weight: 600;
+    color: #1f3350;
+  }
+}
+
+// 分页器与表单项间距微调
+.el-pagination {
+  padding: 14px 0;
+}
+
+.el-form-item__label {
+  color: #3d5876;
+  font-weight: 500;
+}
+
+// ---------------------------------------------------------------------------
+// 2026-09 全局主题变量：主色/圆角/页面底色，一次统一所有功能页
+// ---------------------------------------------------------------------------
+:root {
+  --el-color-primary: #2f7fd1;
+  --el-color-primary-light-3: #6aa3de;
+  --el-color-primary-light-5: #97bfe8;
+  --el-color-primary-light-7: #c4d9f1;
+  --el-color-primary-light-8: #d9e6f6;
+  --el-color-primary-light-9: #eaf1fa;
+  --el-color-primary-dark-2: #2566a8;
+  --el-border-radius-base: 8px;
+}
+
+body {
+  background: #f2f6fb;
+}
+
+// 每个功能页的内容容器 = 灰蓝底上的白色圆角卡片
+.app-container {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px 24px;
+  box-shadow: 0 2px 14px rgba(24, 48, 84, 0.05);
+}
+
+// 侧边栏选中项：左侧青色指示条 + 渐变底（纯视觉，不动布局）
+.sidebar-container .el-menu-item.is-active {
+  background: linear-gradient(90deg, rgba(103, 232, 249, 0.14), transparent 75%);
+  box-shadow: inset 3px 0 0 #67e8f9;
+}
+
+.sidebar-container .el-sub-menu .el-menu-item.is-active {
+  background: linear-gradient(90deg, rgba(103, 232, 249, 0.10), transparent 75%);
+}
+
+// ---------------------------------------------------------------------------
+// 2026-09 v2 风格层：对标 GitHub 最热项目（vue-pure-admin 圆角菜单 / Geeker-Admin 表格标签页）
+// ---------------------------------------------------------------------------
+
+// ── 侧边栏：pure-admin 式圆角胶囊菜单项 ──
+.sidebar-container {
+  .el-menu-item,
+  .el-sub-menu > .el-sub-menu__title,
+  .el-sub-menu .el-menu-item,
+  .nest-menu .el-menu-item {
+    margin: 4px 10px;
+    border-radius: 8px;
+    height: 44px;
+    line-height: 44px;
+  }
+
+  .el-sub-menu .el-menu-item {
+    min-width: 0;
+  }
+}
+
+// ── 顶部导航栏：细投影分层 ──
+.navbar {
+  box-shadow: 0 1px 8px rgba(24, 48, 84, 0.07);
+}
+
+// ── 标签页：Geeker 圆角胶囊（active 从绿色块改品牌蓝）──
+#tags-view-container .tags-view-item {
+  border-radius: 8px !important;
+  border: 1px solid #e3eaf3 !important;
+  background: #fff !important;
+  margin: 0 4px;
+  transition: all 0.18s ease;
+
+  &.active {
+    background: #2f7fd1 !important;
+    border-color: #2f7fd1 !important;
+    color: #fff !important;
+
+    &::before {
+      background: #fff !important;
+    }
+  }
+
+  .el-icon-close {
+    border-radius: 50%;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.12);
+    }
+  }
+}
+
+// ── 表格：Geeker ProTable 风（去竖线、外框圆角、行悬浮）──
+.el-table {
+  .el-table__cell {
+    padding: 10px 0;
+  }
+}
+
+.el-table--border {
+  border: 1px solid #e8eef6 !important;
+  border-radius: 10px;
+  overflow: hidden;
+
+  .el-table__cell {
+    border-right: none !important;
+  }
+
+  &::after {
+    display: none;
+  }
+}
+
+.el-table__inner-wrapper::before {
+  display: none;
+}
+
+// ── 主按钮：悬浮阴影（Geeker 手感）──
+.el-button--primary:not(.is-disabled):not(.is-plain) {
+  box-shadow: 0 3px 10px -4px rgba(47, 127, 209, 0.45);
+}

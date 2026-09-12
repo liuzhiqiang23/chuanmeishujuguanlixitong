@@ -1,0 +1,103 @@
+server:
+  port: 8000
+  undertow:
+    io-threads: 16
+    worker-threads: 40
+    buffer-size: 1024
+    direct-buffers: true
+  compression:
+    enabled: true
+    min-response-size: 1
+
+#logging logback
+logging:
+  config: classpath:logback-spring.xml
+  file:
+    name: exam
+
+#mybatis
+#mybatis:
+#  mapper-locations: classpath:/mapper/*.xml
+#  configuration:
+ #   log-prefix: repository.
+mybatis-plus:
+  mapper-locations: classpath:mapper/**/*Mapper.xml
+  type-aliases-package: com.alvis.media.domain.**
+  configuration:
+    cache-enabled: false
+    map-underscore-to-camel-case: true
+    # 这个配置会将执行的sql打印出来，在开发或测试的时候可以用
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    banner: false
+    db-config:
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+      table-underline: true
+      column-like: true
+
+
+system:
+  security-ignore-urls:
+    - /api/wx/**
+    - /api/admin/upload/configAndUpload
+    - /api/admin/upload/auth
+    - /api/student/user/register
+    - /api/admin/video/**
+  pwdKey:
+    publicKey: ${PWD_KEY_PUBLIC_KEY:}
+    privateKey: ${PWD_KEY_PRIVATE_KEY:}
+  wx:
+    appid: 
+    secret: 
+    token-to-live: 12h   #token 过期时间
+    security-ignore-urls:
+      - /api/wx/student/auth/bind
+      - /api/wx/student/auth/checkBind
+      - /api/wx/student/user/register
+
+
+
+#mybatis page helper
+pagehelper:
+  autoDialect: true
+  closeConn: true
+  reasonable: true
+
+
+#mybatis datasource default HikariPool
+spring:
+  servlet:
+    multipart:
+      # 文件最大限制
+      max-file-size: 1024MB
+      # 请求最大限制
+      max-request-size: 1024MB
+      enabled: true
+      # 设置文件缓存的临界点,超过则先保存到临时目录,默认为0,所有文件都会进行缓存
+      file-size-threshold: 0
+  session:
+    store-type: redis
+  datasource:
+    hikari:
+      idle-timeout: 600000  #10 min
+      max-lifetime: 1800000 #30 min
+  data:
+    redis:
+      timeout: 10000 #超时时间
+      database: 0 #0-15 16个库 默认0
+      lettuce:
+        pool:
+          max-active: 8 #最大连接数
+          max-wait: -1 #默认-1 最大连接阻塞等待时间
+          max-idle: 8 #最大空闲连接 默认8
+          min-idle: 0 #最小空闲连接
+  cache:
+    type: redis
+    redis:
+      time-to-live: 12h   #12 hour
+
+
+  #runningtime environment
+  profiles:
+    active:  dev

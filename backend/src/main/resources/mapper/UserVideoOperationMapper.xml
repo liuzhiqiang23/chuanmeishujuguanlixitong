@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alvis.media.repository.UserVideoOperationMapper">
+  <resultMap id="BaseResultMap" type="com.alvis.media.domain.UserVideoOperation">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <id column="video_id" jdbcType="INTEGER" property="videoId" />
+    <result column="thumb_up" jdbcType="INTEGER" property="thumbUp" />
+    <result column="collection" jdbcType="INTEGER" property="collection" />
+    <result column="praise_bad_reviews" jdbcType="INTEGER" property="praiseBadReviews" />
+    <result column="comment" jdbcType="VARCHAR" property="comment" />
+    <result column="finally_active_time" jdbcType="TIMESTAMP" property="finallyActiveTime" />
+    <result column="rating" jdbcType="DOUBLE" property="rating" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, video_id, thumb_up, collection, praise_bad_reviews, comment, finally_active_time
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="com.alvis.media.domain.UserVideoOperationKey" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_user_video_operation
+    where id = #{id,jdbcType=INTEGER}
+      and video_id = #{videoId,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="com.alvis.media.domain.UserVideoOperationKey">
+    delete from t_user_video_operation
+    where id = #{id,jdbcType=INTEGER}
+      and video_id = #{videoId,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.alvis.media.domain.UserVideoOperation">
+    insert into t_user_video_operation (id, video_id, thumb_up, 
+      collection, praise_bad_reviews, comment, 
+      finally_active_time)
+    values (#{id,jdbcType=INTEGER}, #{videoId,jdbcType=INTEGER}, #{thumbUp,jdbcType=INTEGER}, 
+      #{collection,jdbcType=INTEGER}, #{praiseBadReviews,jdbcType=INTEGER}, #{comment,jdbcType=VARCHAR}, 
+      #{finallyActiveTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.alvis.media.domain.UserVideoOperation">
+    insert into t_user_video_operation
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="videoId != null">
+        video_id,
+      </if>
+      <if test="thumbUp != null">
+        thumb_up,
+      </if>
+      <if test="collection != null">
+        collection,
+      </if>
+      <if test="praiseBadReviews != null">
+        praise_bad_reviews,
+      </if>
+      <if test="comment != null">
+        comment,
+      </if>
+      <if test="finallyActiveTime != null">
+        finally_active_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="videoId != null">
+        #{videoId,jdbcType=INTEGER},
+      </if>
+      <if test="thumbUp != null">
+        #{thumbUp,jdbcType=INTEGER},
+      </if>
+      <if test="collection != null">
+        #{collection,jdbcType=INTEGER},
+      </if>
+      <if test="praiseBadReviews != null">
+        #{praiseBadReviews,jdbcType=INTEGER},
+      </if>
+      <if test="comment != null">
+        #{comment,jdbcType=VARCHAR},
+      </if>
+      <if test="finallyActiveTime != null">
+        #{finallyActiveTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.alvis.media.domain.UserVideoOperation">
+    update t_user_video_operation
+    <set>
+      <if test="thumbUp != null">
+        thumb_up = #{thumbUp,jdbcType=INTEGER},
+      </if>
+      <if test="collection != null">
+        collection = #{collection,jdbcType=INTEGER},
+      </if>
+      <if test="praiseBadReviews != null">
+        praise_bad_reviews = #{praiseBadReviews,jdbcType=INTEGER},
+      </if>
+      <if test="comment != null">
+        comment = #{comment,jdbcType=VARCHAR},
+      </if>
+      <if test="finallyActiveTime != null">
+        finally_active_time = #{finallyActiveTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+      and video_id = #{videoId,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.alvis.media.domain.UserVideoOperation">
+    update t_user_video_operation
+    set thumb_up = #{thumbUp,jdbcType=INTEGER},
+      collection = #{collection,jdbcType=INTEGER},
+      praise_bad_reviews = #{praiseBadReviews,jdbcType=INTEGER},
+      comment = #{comment,jdbcType=VARCHAR},
+      finally_active_time = #{finallyActiveTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+      and video_id = #{videoId,jdbcType=INTEGER}
+  </update>
+
+  <select id="selectRatingDistribution" resultType="com.alvis.media.domain.other.KeyValue">
+    SELECT ROUND(rating) AS name, COUNT(*) AS value
+    FROM t_user_video_operation
+    WHERE rating IS NOT NULL
+    GROUP BY ROUND(rating) ORDER BY name
+  </select>
+
+  <select id="selectActiveUsers" resultType="com.alvis.media.domain.other.KeyValue">
+    SELECT u.user_name AS name, COUNT(o.id) AS value
+    FROM t_user_video_operation o JOIN t_user u ON o.id = u.id
+    GROUP BY u.user_name ORDER BY value DESC LIMIT 10
+  </select>
+
+  <select id="selectRatingCountDistribution" resultType="com.alvis.media.domain.other.KeyValue">
+    SELECT
+      CASE
+        WHEN c &lt;= 10 THEN '1-10次'
+        WHEN c &lt;= 20 THEN '11-20次'
+        WHEN c &lt;= 50 THEN '21-50次'
+        WHEN c &lt;= 100 THEN '51-100次'
+        ELSE '100次以上'
+      END AS name,
+      COUNT(*) AS value
+    FROM (SELECT id, COUNT(*) AS c FROM t_user_video_operation GROUP BY id) t
+    GROUP BY name
+    ORDER BY MIN(c)
+  </select>
+
+  <select id="selectUserAvgRatingDistribution" resultType="com.alvis.media.domain.other.KeyValue">
+    SELECT ROUND(avg_r) AS name, COUNT(*) AS value
+    FROM (SELECT AVG(rating) AS avg_r
+          FROM t_user_video_operation
+          WHERE rating IS NOT NULL
+          GROUP BY id) t
+    GROUP BY name
+    ORDER BY name
+  </select>
+
+  <select id="selectUserStats" resultType="java.util.Map">
+    SELECT COUNT(*) AS rating_count,
+           COUNT(DISTINCT id) AS user_count,
+           ROUND(AVG(rating), 2) AS avg_rating,
+           SUM(CASE WHEN rating &lt;= 2 THEN 1 ELSE 0 END) AS low_count,
+           SUM(CASE WHEN rating &gt;= 4 THEN 1 ELSE 0 END) AS high_count
+    FROM t_user_video_operation
+    WHERE rating IS NOT NULL
+  </select>
+
+</mapper>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alvis.media.repository.VideoTagMapper">
+  <resultMap id="BaseResultMap" type="com.alvis.media.domain.VideoTag">
+    <result column="video_id" jdbcType="INTEGER" property="videoId" />
+    <result column="tag_id" jdbcType="INTEGER" property="tagId" />
+    <result column="video_property_flag" jdbcType="BIT" property="videoPropertyFlag" />
+  </resultMap>
+  <insert id="insert" parameterType="com.alvis.media.domain.VideoTag">
+    insert into t_video_tag (video_id, tag_id, video_property_flag
+      )
+    values (#{videoId,jdbcType=INTEGER}, #{tagId,jdbcType=INTEGER}, #{videoPropertyFlag,jdbcType=BIT}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.alvis.media.domain.VideoTag">
+    insert into t_video_tag
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="videoId != null">
+        video_id,
+      </if>
+      <if test="tagId != null">
+        tag_id,
+      </if>
+      <if test="videoPropertyFlag != null">
+        video_property_flag,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="videoId != null">
+        #{videoId,jdbcType=INTEGER},
+      </if>
+      <if test="tagId != null">
+        #{tagId,jdbcType=INTEGER},
+      </if>
+      <if test="videoPropertyFlag != null">
+        #{videoPropertyFlag,jdbcType=BIT},
+      </if>
+    </trim>
+  </insert>
+</mapper>

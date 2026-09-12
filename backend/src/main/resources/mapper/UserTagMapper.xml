@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alvis.media.repository.UserTagMapper">
+  <resultMap id="BaseResultMap" type="com.alvis.media.domain.UserTag">
+    <result column="user_id" jdbcType="INTEGER" property="userId" />
+    <result column="tag_id" jdbcType="INTEGER" property="tagId" />
+    <result column="user_property_flag" jdbcType="BIT" property="userPropertyFlag" />
+    <result column="tag_name" jdbcType="VARCHAR" property="tagName" />
+  </resultMap>
+  <insert id="insert" parameterType="com.alvis.media.domain.UserTag">
+    insert into t_user_tag (user_id, tag_id, user_property_flag
+      )
+    values (#{userId,jdbcType=INTEGER}, #{tagId,jdbcType=INTEGER}, #{userPropertyFlag,jdbcType=BIT}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.alvis.media.domain.UserTag">
+    insert into t_user_tag
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="userId != null">
+        user_id,
+      </if>
+      <if test="tagId != null">
+        tag_id,
+      </if>
+      <if test="userPropertyFlag != null">
+        user_property_flag,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="userId != null">
+        #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="tagId != null">
+        #{tagId,jdbcType=INTEGER},
+      </if>
+      <if test="userPropertyFlag != null">
+        #{userPropertyFlag,jdbcType=BIT},
+      </if>
+    </trim>
+  </insert>
+  <select id="selectUserTagByUserId" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select
+    *
+    from t_user_tag t1,T_tag t2
+    where t1.user_id = #{userId,jdbcType=INTEGER} and t1.tag_id = t2.tag_id
+  </select>
+</mapper>
