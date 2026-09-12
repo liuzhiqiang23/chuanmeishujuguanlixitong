@@ -1,0 +1,47 @@
+# ---------- Java / Maven ----------
+backend/target/
+*.class
+*.jar.original
+
+# ---------- IDE ----------
+.idea/
+*.iml
+.vscode/
+*.swp
+
+# ---------- 前端（Vite） ----------
+# 构建产物：npm run build 后需手动同步到 backend/src/main/resources/static/admin
+frontend/node_modules/
+frontend/admin/
+frontend/dist/
+frontend/.vite/
+
+# ---------- Python ----------
+__pycache__/
+*.pyc
+.venv/
+
+# ---------- 日志与临时文件 ----------
+*.log
+log/
+_boot.log
+backend/log/
+
+# ---------- 系统 / Office 临时 ----------
+.DS_Store
+Thumbs.db
+~$*
+
+# ---------- 运行期生成 ----------
+frontend/_ui_test.*
+frontend/test_*.mjs
+_shots/
+
+# ---------- 数据 / 密钥（不入源码仓） ----------
+data/tmdb_key.txt
+backend/src/main/resources/static/posters/
+
+# local AI assistant config (Claude Code model router)
+.claude/
+data/_git_need_add.txt
+data/_git_orphans.txt

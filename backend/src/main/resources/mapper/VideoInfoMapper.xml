@@ -1,0 +1,400 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alvis.media.repository.VideoInfoMapper">
+  <resultMap id="BaseResultMap" type="com.alvis.media.domain.VideoInfo">
+    <id column="video_id" jdbcType="INTEGER" property="videoId" />
+    <result column="video_name" jdbcType="VARCHAR" property="videoName" />
+    <result column="video_category" jdbcType="BIT" property="videoCategory" />
+    <result column="create_time" jdbcType="DATE" property="createTime" />
+    <result column="creator_id" jdbcType="INTEGER" property="creatorId" />
+    <result column="last_modify_time" jdbcType="TIMESTAMP" property="lastModifyTime" />
+    <result column="video_url" jdbcType="VARCHAR" property="videoUrl" />
+    <result column="original_title" jdbcType="VARCHAR" property="originalTitle" />
+    <result column="overview" jdbcType="VARCHAR" property="overview" />
+    <result column="tagline" jdbcType="VARCHAR" property="tagline" />
+    <result column="budget" jdbcType="BIGINT" property="budget" />
+    <result column="revenue" jdbcType="BIGINT" property="revenue" />
+    <result column="popularity" jdbcType="DOUBLE" property="popularity" />
+    <result column="vote_average" jdbcType="DOUBLE" property="voteAverage" />
+    <result column="vote_count" jdbcType="INTEGER" property="voteCount" />
+    <result column="runtime" jdbcType="INTEGER" property="runtime" />
+    <result column="release_date" jdbcType="DATE" property="releaseDate" />
+    <result column="original_language" jdbcType="VARCHAR" property="originalLanguage" />
+    <result column="poster_path" jdbcType="VARCHAR" property="posterPath" />
+    <result column="heat_score" jdbcType="DOUBLE" property="heatScore" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    video_id, video_name, video_category, create_time, creator_id, last_modify_time,
+    video_url, original_title, overview, tagline, budget, revenue, popularity, vote_average,
+    vote_count, runtime, release_date, original_language, poster_path, heat_score
+  </sql>
+  <select id="selectNewVideoCount" parameterType="com.alvis.media.domain.VideoInfo" resultType="java.lang.Integer">
+    SELECT
+    count(1)
+    FROM t_video_info
+    <where>
+      <if test="createTime != null">
+        and create_time > #{createTime}
+      </if>
+    </where>
+  </select>
+
+<!--  <select id="selectVideoIdByUrl" parameterType="java.lang.String" resultType="java.lang.Integer">
+    SELECT
+    video_id
+    FROM t_video_info
+    <where>
+      <if test="video_url != null">
+        and video_url = #{videoUrl}
+      </if>
+    </where>
+  </select>-->
+
+
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_video_info
+    where video_id = #{videoId,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from t_video_info
+    where video_id = #{videoId,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.alvis.media.domain.VideoInfo">
+    <selectKey keyProperty="videoId" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into t_video_info (video_name, video_category, create_time, 
+      creator_id, last_modify_time, video_url
+      )
+    values (#{videoName,jdbcType=VARCHAR}, #{videoCategory,jdbcType=BIT}, #{createTime,jdbcType=DATE}, 
+      #{creatorId,jdbcType=INTEGER}, #{lastModifyTime,jdbcType=TIMESTAMP}, #{videoUrl,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.alvis.media.domain.VideoInfo">
+    <selectKey keyProperty="videoId" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into t_video_info
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="videoName != null">
+        video_name,
+      </if>
+      <if test="videoCategory != null">
+        video_category,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="creatorId != null">
+        creator_id,
+      </if>
+      <if test="lastModifyTime != null">
+        last_modify_time,
+      </if>
+      <if test="videoUrl != null">
+        video_url,
+      </if>
+      <if test="originalTitle != null">
+        original_title,
+      </if>
+      <if test="overview != null">
+        overview,
+      </if>
+      <if test="tagline != null">
+        tagline,
+      </if>
+      <if test="budget != null">
+        budget,
+      </if>
+      <if test="revenue != null">
+        revenue,
+      </if>
+      <if test="popularity != null">
+        popularity,
+      </if>
+      <if test="voteAverage != null">
+        vote_average,
+      </if>
+      <if test="voteCount != null">
+        vote_count,
+      </if>
+      <if test="runtime != null">
+        runtime,
+      </if>
+      <if test="releaseDate != null">
+        release_date,
+      </if>
+      <if test="originalLanguage != null">
+        original_language,
+      </if>
+      <if test="posterPath != null">
+        poster_path,
+      </if>
+      <if test="heatScore != null">
+        heat_score,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="videoName != null">
+        #{videoName,jdbcType=VARCHAR},
+      </if>
+      <if test="videoCategory != null">
+        #{videoCategory,jdbcType=BIT},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=DATE},
+      </if>
+      <if test="creatorId != null">
+        #{creatorId,jdbcType=INTEGER},
+      </if>
+      <if test="lastModifyTime != null">
+        #{lastModifyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="videoUrl != null">
+        #{videoUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="originalTitle != null">
+        #{originalTitle,jdbcType=VARCHAR},
+      </if>
+      <if test="overview != null">
+        #{overview,jdbcType=VARCHAR},
+      </if>
+      <if test="tagline != null">
+        #{tagline,jdbcType=VARCHAR},
+      </if>
+      <if test="budget != null">
+        #{budget,jdbcType=BIGINT},
+      </if>
+      <if test="revenue != null">
+        #{revenue,jdbcType=BIGINT},
+      </if>
+      <if test="popularity != null">
+        #{popularity,jdbcType=DOUBLE},
+      </if>
+      <if test="voteAverage != null">
+        #{voteAverage,jdbcType=DOUBLE},
+      </if>
+      <if test="voteCount != null">
+        #{voteCount,jdbcType=INTEGER},
+      </if>
+      <if test="runtime != null">
+        #{runtime,jdbcType=INTEGER},
+      </if>
+      <if test="releaseDate != null">
+        #{releaseDate,jdbcType=DATE},
+      </if>
+      <if test="originalLanguage != null">
+        #{originalLanguage,jdbcType=VARCHAR},
+      </if>
+      <if test="posterPath != null">
+        #{posterPath,jdbcType=VARCHAR},
+      </if>
+      <if test="heatScore != null">
+        #{heatScore,jdbcType=DOUBLE},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.alvis.media.domain.VideoInfo">
+    update t_video_info
+    <set>
+      <if test="videoName != null">
+        video_name = #{videoName,jdbcType=VARCHAR},
+      </if>
+      <if test="videoCategory != null">
+        video_category = #{videoCategory,jdbcType=BIT},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=DATE},
+      </if>
+      <if test="creatorId != null">
+        creator_id = #{creatorId,jdbcType=INTEGER},
+      </if>
+      <if test="lastModifyTime != null">
+        last_modify_time = #{lastModifyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="videoUrl != null">
+        video_url = #{videoUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="originalTitle != null">
+        original_title = #{originalTitle,jdbcType=VARCHAR},
+      </if>
+      <if test="overview != null">
+        overview = #{overview,jdbcType=VARCHAR},
+      </if>
+      <if test="tagline != null">
+        tagline = #{tagline,jdbcType=VARCHAR},
+      </if>
+      <if test="budget != null">
+        budget = #{budget,jdbcType=BIGINT},
+      </if>
+      <if test="revenue != null">
+        revenue = #{revenue,jdbcType=BIGINT},
+      </if>
+      <if test="popularity != null">
+        popularity = #{popularity,jdbcType=DOUBLE},
+      </if>
+      <if test="voteAverage != null">
+        vote_average = #{voteAverage,jdbcType=DOUBLE},
+      </if>
+      <if test="voteCount != null">
+        vote_count = #{voteCount,jdbcType=INTEGER},
+      </if>
+      <if test="runtime != null">
+        runtime = #{runtime,jdbcType=INTEGER},
+      </if>
+      <if test="releaseDate != null">
+        release_date = #{releaseDate,jdbcType=DATE},
+      </if>
+      <if test="originalLanguage != null">
+        original_language = #{originalLanguage,jdbcType=VARCHAR},
+      </if>
+      <if test="posterPath != null">
+        poster_path = #{posterPath,jdbcType=VARCHAR},
+      </if>
+      <if test="heatScore != null">
+        heat_score = #{heatScore,jdbcType=DOUBLE},
+      </if>
+    </set>
+    where video_id = #{videoId,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.alvis.media.domain.VideoInfo">
+    update t_video_info
+    set video_name = #{videoName,jdbcType=VARCHAR},
+      video_category = #{videoCategory,jdbcType=BIT},
+      create_time = #{createTime,jdbcType=DATE},
+      creator_id = #{creatorId,jdbcType=INTEGER},
+      last_modify_time = #{lastModifyTime,jdbcType=TIMESTAMP},
+      video_url = #{videoUrl,jdbcType=VARCHAR}
+    where video_id = #{videoId,jdbcType=INTEGER}
+  </update>
+
+  <select id="videoPage" resultMap="BaseResultMap" parameterType="com.alvis.media.viewmodel.video.VideoPageRequestVM">
+    SELECT
+    <include refid="Base_Column_List"/>
+    FROM t_video_info
+    <where>
+
+      <if test="videoName != null and videoName != ''">
+        and (video_name like concat('%',#{videoName},'%')
+             or original_title like concat('%',#{videoName},'%'))
+      </if>
+
+    </where>
+  </select>
+
+  <select id="selectHotVideoList"  resultMap="BaseResultMap">
+  SELECT
+  t1.*
+  FROM
+  t_video_info t1,
+  ( SELECT sum( play_times ), video_id FROM t_video_play t2 GROUP BY video_id ORDER BY sum( play_times ) DESC ) t2
+  WHERE
+  t1.video_id = t2.video_id
+  LIMIT 3
+  </select>
+  <select id="selectVideoIdByUrl" resultType="java.lang.Integer" parameterType="java.lang.String">
+    SELECT
+       video_Id
+    FROM t_video_info
+    <where>
+      <if test="videoUrl != null and videoUrl != ''">
+        and video_url = #{videoUrl}
+      </if>
+    </where>
+  </select>
+
+  <select id="selectHeatTop" resultMap="BaseResultMap">
+    SELECT <include refid="Base_Column_List"/>
+    FROM t_video_info
+    WHERE heat_score IS NOT NULL
+    ORDER BY heat_score DESC
+    LIMIT #{limit}
+  </select>
+
+  <select id="selectGenreDistribution" resultType="com.alvis.media.domain.other.KeyValue">
+    SELECT t.tag_name AS name, COUNT(*) AS value
+    FROM t_video_tag vt JOIN t_tag t ON vt.tag_id = t.tag_id
+    GROUP BY t.tag_name ORDER BY value DESC
+  </select>
+
+  <select id="selectYearDistribution" resultType="com.alvis.media.domain.other.KeyValue">
+    SELECT YEAR(release_date) AS name, COUNT(*) AS value
+    FROM t_video_info
+    WHERE release_date IS NOT NULL
+    GROUP BY YEAR(release_date) ORDER BY name
+  </select>
+
+  <select id="selectBudgetRevenue" resultMap="BaseResultMap">
+    SELECT <include refid="Base_Column_List"/>
+    FROM t_video_info
+    WHERE budget IS NOT NULL AND revenue IS NOT NULL AND budget &gt; 0
+    LIMIT 2000
+  </select>
+
+  <select id="selectRuntimeDistribution" resultType="com.alvis.media.domain.other.KeyValue">
+    SELECT
+      CASE
+        WHEN runtime &lt;= 60 THEN '60分钟以内'
+        WHEN runtime &lt;= 90 THEN '60-90分钟'
+        WHEN runtime &lt;= 120 THEN '90-120分钟'
+        WHEN runtime &lt;= 150 THEN '120-150分钟'
+        WHEN runtime &lt;= 180 THEN '150-180分钟'
+        ELSE '180分钟以上'
+      END AS name,
+      COUNT(*) AS value
+    FROM t_video_info
+    WHERE runtime IS NOT NULL AND runtime &gt; 0
+    GROUP BY name
+    ORDER BY MIN(runtime)
+  </select>
+
+  <select id="selectLanguageDistribution" resultType="com.alvis.media.domain.other.KeyValue">
+    SELECT original_language AS name, COUNT(*) AS value
+    FROM t_video_info
+    WHERE original_language IS NOT NULL AND original_language != ''
+    GROUP BY original_language
+    ORDER BY value DESC
+    LIMIT 10
+  </select>
+
+  <select id="selectTopRevenue" resultMap="BaseResultMap">
+    SELECT <include refid="Base_Column_List"/>
+    FROM t_video_info
+    WHERE revenue IS NOT NULL AND revenue &gt; 0
+    ORDER BY revenue DESC
+    LIMIT #{limit}
+  </select>
+
+  <select id="selectVideoStats" resultType="java.util.Map">
+    SELECT COUNT(*) AS video_count,
+           ROUND(AVG(budget), 0) AS avg_budget,
+           ROUND(AVG(revenue), 0) AS avg_revenue,
+           ROUND(AVG(vote_average), 1) AS avg_vote,
+           ROUND(AVG(runtime), 0) AS avg_runtime,
+           ROUND(AVG(popularity), 1) AS avg_popularity
+    FROM t_video_info
+  </select>
+
+  <!-- 散点图专用：仅取数值列，避免整表大文本实体导致响应过大 -->
+  <select id="selectBudgetRevenuePoints" resultType="java.util.Map">
+    SELECT video_name AS videoName, budget, revenue, popularity, vote_average AS voteAverage
+    FROM t_video_info
+    WHERE budget IS NOT NULL AND revenue IS NOT NULL AND budget &gt; 0
+    LIMIT 2000
+  </select>
+
+  <select id="selectAll" resultMap="BaseResultMap">
+    SELECT <include refid="Base_Column_List"/>
+    FROM t_video_info
+  </select>
+
+  <select id="selectByIds" resultMap="BaseResultMap">
+    SELECT <include refid="Base_Column_List"/>
+    FROM t_video_info
+    WHERE video_id IN
+    <foreach collection="ids" item="id" open="(" separator="," close=")">#{id}</foreach>
+  </select>
+
+</mapper>

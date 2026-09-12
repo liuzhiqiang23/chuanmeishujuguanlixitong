@@ -1,0 +1,15 @@
+#     买源码就到 《奇趣资源优选》 
+#     网址：https://shop379896684.taobao.com   
+#     更多优质源码，请访问：http://www.qiquCode.com
+#     加微信获取最新源码信息：kofcheng201
+logging:
+  path: /usr/log/exam/
+
+spring:
+  redis:
+    host: 192.168.0.96
+  datasource:
+    url: jdbc:mysql://192.168.1.100:3306/video_mangage_db?useSSL=false&useUnicode=true&serverTimezone=UTC&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&allowPublicKeyRetrieval=true&allowMultiQueries=true
+    username: root
+    password: ${DB_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver

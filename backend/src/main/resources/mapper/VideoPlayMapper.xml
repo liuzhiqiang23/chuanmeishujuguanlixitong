@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alvis.media.repository.VideoPlayMapper">
+  <resultMap id="BaseResultMap" type="com.alvis.media.domain.VideoPlay">
+    <result column="video_id" jdbcType="INTEGER" property="videoId" />
+    <result column="user_id" jdbcType="INTEGER" property="userId" />
+    <result column="last_play_time" jdbcType="TIMESTAMP" property="lastPlayTime" />
+    <result column="play_times" jdbcType="INTEGER" property="playTimes" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    video_id,user_id,last_play_time,play_times
+  </sql>
+  <select id="selectCountByDate"  resultType="com.alvis.media.domain.other.KeyValue">
+    SELECT last_play_time as name,SUM(play_times) as value from
+      (
+      SELECT DATE_FORMAT(last_play_time,'%Y-%m-%d') as last_play_time,play_times from t_video_play
+      WHERE  last_play_time  between  #{startTime}  and  #{endTime}
+      ) a
+    GROUP BY last_play_time
+  </select>
+
+  <select id="selectBestVideo" parameterType="com.alvis.media.domain.VideoPlay" resultType="java.lang.String">
+    SELECT
+      video_name
+    FROM(
+	     SELECT *
+         FROM t_video_play
+         ORDER BY play_times DESC
+         LIMIT 1)as best,t_video_info 
+    <where>
+      best.video_id = t_video_info.video_id
+      <if test="lastPlayTime != null">
+        and last_play_time > #{lastPlayTime}
+      </if>
+    </where>
+  </select>
+  
+  
+  <select id="selectVideoPlayCount" parameterType="com.alvis.media.domain.VideoPlay" resultType="java.lang.Integer">
+    SELECT
+    sum(play_times)
+    FROM t_video_play
+    <where>
+      <if test="lastPlayTime != null">
+        and last_play_time > #{lastPlayTime}
+      </if>
+    </where>
+  </select>
+
+
+
+
+  <select id="selectVideoPlayInfo" parameterType="com.alvis.media.domain.VideoPlay" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List"></include>
+    from
+     t_video_play
+    <where>
+      <if test="lastPlayTime != null">
+        and last_play_time = #{lastPlayTime}
+      </if>
+      <if test="userId != null">
+        and user_Id = #{userId}
+      </if>
+      <if test="videoId != null">
+        and video_id = #{videoId}
+      </if>
+      <if test="playTimes != null">
+        and play_times = #{playTimes}
+      </if>
+    </where>
+  </select>
+<!--  <select id="selectByUserIdAndVideoId" parameterType="com.alvis.exam.domain.VideoPlay" resultMap="BaseResultMap">-->
+<!--    SELECT-->
+<!--   *-->
+<!--    FROM t_video_play-->
+<!--    <where>-->
+<!--      <if test="userId != null">-->
+<!--        and user_id = #{userId}-->
+<!--      </if>-->
+<!--      <if test="videoId != null">-->
+<!--        and video_id = #{videoId}-->
+<!--      </if>-->
+<!--    </where>-->
+<!--  </select>-->
+
+  <insert id="insert" parameterType="com.alvis.media.domain.VideoPlay">
+    insert into t_video_play (video_id, user_id, last_play_time, 
+      play_times)
+    values (#{videoId,jdbcType=INTEGER}, #{userId,jdbcType=INTEGER}, #{lastPlayTime,jdbcType=TIMESTAMP}, 
+      #{playTimes,jdbcType=INTEGER})
+  </insert>
+  <insert id="insertSelective" parameterType="com.alvis.media.domain.VideoPlay">
+    insert into t_video_play
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="videoId != null">
+        video_id,
+      </if>
+      <if test="userId != null">
+        user_id,
+      </if>
+      <if test="lastPlayTime != null">
+        last_play_time,
+      </if>
+      <if test="playTimes != null">
+        play_times,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="videoId != null">
+        #{videoId,jdbcType=INTEGER},
+      </if>
+      <if test="userId != null">
+        #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="lastPlayTime != null">
+        #{lastPlayTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="playTimes != null">
+        #{playTimes,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.alvis.media.domain.VideoPlay">
+    update t_video_play
+    <set>
+      <if test="userId != null">
+         user_Id = #{userId},
+      </if>
+      <if test="videoId != null">
+        video_id = #{videoId},
+      </if>
+      <if test="playTimes != null">
+       play_times = #{playTimes},
+      </if>
+      <if test="lastPlayTime != null">
+        last_Play_Time =  #{lastPlayTime},
+      </if>
+    </set>
+    where video_id = #{videoId,jdbcType=INTEGER} and user_Id = #{userId}
+  </update>
+</mapper>

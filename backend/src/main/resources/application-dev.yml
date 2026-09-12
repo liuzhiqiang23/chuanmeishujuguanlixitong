@@ -1,0 +1,29 @@
+
+
+logging:
+  file:
+    path: ./log/
+
+spring:
+  data:
+    redis:
+      host: 127.0.0.1
+  datasource:
+    url: jdbc:mysql://localhost:3306/vidio_mangage_db?useSSL=false&useUnicode=true&serverTimezone=UTC&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&allowPublicKeyRetrieval=true&allowMultiQueries=true
+    username: root
+    password: ${DB_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+system:
+  python:
+    # 本系统虚拟环境与算法引擎（已收编自 Movie-Analysis-master，工程自包含）
+    # 注意：以下路径均为相对路径，以「backend 目录」为工作目录解析
+    # （IDE 点运行 / 在 backend 下执行 java -jar / mvn spring-boot:run 均满足）。
+    # 因此把整个 movie-system 目录拷贝到任何机器、任何盘符都无需改动本配置。
+    path: '../.venv/Scripts/python.exe'
+    script: '../algorithm/recommendation/recommend_api.py'
+    predictScript: '../algorithm/prediction/predict_api.py'
+  eda:
+    # Python 离线 EDA 图输出目录（FeatureEDA/eda.py 一次生成的全部 PNG）
+    # 通过 /eda/** 暴露给前端「特征探索分析」页面；重跑 Python 后无需重启后端即可看到新图
+    dir: '../algorithm/FeatureEDA/figures'
