@@ -1,0 +1,17 @@
+{
+  "description": "movie-system 小程序端（会员/优惠券/订单）",
+  "packOptions": { "ignore": [] },
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "enhance": false,
+    "postcss": true,
+    "minified": false,
+    "nodeModules": false
+  },
+  "compileType": "miniprogram",
+  "libVersion": "3.5.0",
+  "appid": "touristappid",
+  "projectname": "movie-system-miniprogram",
+  "condition": {}
+}

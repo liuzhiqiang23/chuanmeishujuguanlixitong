@@ -1,0 +1,65 @@
+<!-- 会员中心 -->
+<view class="page">
+  <view class="member-bar">
+    <view class="member-title">
+      {{member && member.isMember ? '会员卡生效中' : '还不是会员'}}
+    </view>
+    <view class="member-sub">
+      {{member && member.isMember ? '有效期至 ' + member.expireTime + ' · 影片 8 折' : '开通后买观影券立即 8 折'}}
+    </view>
+  </view>
+
+  <!-- 套餐 -->
+  <view class="card">
+    <text class="title">选择套餐</text>
+    <view class="divider"></view>
+    <view class="plan {{selectedMonths === item.months ? 'plan-active' : ''}}"
+          wx:for="{{plans}}" wx:key="months"
+          data-months="{{item.months}}" bindtap="choosePlan">
+      <view>
+        <view class="plan-name">{{item.name}}</view>
+        <view class="muted">{{item.desc}}</view>
+      </view>
+      <view class="plan-price">
+        <text class="price" style="font-size:38rpx">¥{{item.price}}</text>
+        <text class="muted"> / {{item.months}}个月</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 用券 -->
+  <view class="card" wx:if="{{coupons.length > 0}}">
+    <text class="title">可用优惠券</text>
+    <view class="divider"></view>
+    <view class="coupon-row" data-id="0" bindtap="chooseCoupon">
+      <text>不使用优惠券</text>
+      <text class="radio">{{selectedId === 0 ? '●' : '○'}}</text>
+    </view>
+    <view class="coupon-row" wx:for="{{coupons}}" wx:key="id" data-id="{{item.id}}" bindtap="chooseCoupon">
+      <view>
+        <view>{{item.title}}</view>
+        <view class="muted">满 {{item.threshold}} 减 {{item.amount}}</view>
+      </view>
+      <text class="radio">{{selectedId === item.id ? '●' : '○'}}</text>
+    </view>
+  </view>
+  <view class="card" wx:else>
+    <view class="muted">暂无可用券，<text style="color:#2F7FD1" bindtap="goIndex">去首页领券</text></view>
+  </view>
+
+  <view class="muted" style="margin:0 24rpx">
+    买了会员套餐同样会生成订单，可以在「我的」里看到；演示版下单即支付成功，会员立即生效。
+  </view>
+
+  <view style="height:180rpx"></view>
+
+  <view class="footer-bar row-between">
+    <view>
+      <text class="muted">应付</text>
+      <text class="price" style="font-size:38rpx;margin-left:10rpx">¥{{payAmount}}</text>
+    </view>
+    <button class="btn-primary pay-btn" bindtap="open" disabled="{{submitting}}">
+      {{member && member.isMember ? '立即续费' : '立即开通'}}
+    </button>
+  </view>
+</view>

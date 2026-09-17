@@ -55,6 +55,12 @@ system:
       - /api/wx/student/auth/bind
       - /api/wx/student/auth/checkBind
       - /api/wx/student/user/register
+      # 小程序商城（会员/券/订单）：演示版靠请求体里的 userId 认人，所以这几组不进 token 拦截。
+      # 正式接入微信登录后要收紧——只放行 /api/wx/login，其余接口改成从 token 解析用户。
+      - /api/wx/login
+      - /api/wx/member/**
+      - /api/wx/coupon/**
+      - /api/wx/order/**
 
 
 

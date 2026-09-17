@@ -1,0 +1,82 @@
+<!-- 我的 -->
+<view class="page">
+  <!-- 账号 / 会员 -->
+  <view class="user-bar">
+    <view class="row-between">
+      <view>
+        <view class="user-name">{{userId ? '微信用户 #' + userId : '未登录'}}</view>
+        <view class="muted" style="color:#DCE6F5">
+          {{member && member.isMember ? '会员有效至 ' + member.expireTime : '还不是会员'}}
+        </view>
+      </view>
+      <view class="row">
+        <view class="bar-btn" bindtap="goMember">{{member && member.isMember ? '续费' : '开通会员'}}</view>
+        <view class="bar-btn" bindtap="relogin" style="margin-left:16rpx">重新登录</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 切换 -->
+  <view class="card">
+    <view class="row">
+      <view class="tab {{tab === 'order' ? 'tab-active' : ''}}" data-tab="order" bindtap="switchTab">
+        我的订单
+      </view>
+      <view class="tab {{tab === 'coupon' ? 'tab-active' : ''}}" data-tab="coupon" bindtap="switchTab">
+        我的券
+      </view>
+    </view>
+  </view>
+
+  <!-- 订单 -->
+  <block wx:if="{{tab === 'order'}}">
+    <view class="card" wx:for="{{orders}}" wx:key="orderNo">
+      <view class="row-between">
+        <text class="muted">{{item.orderNo}}</text>
+        <text class="{{item.status === 1 ? 'price' : 'muted'}}">{{item.statusText}}</text>
+      </view>
+      <view class="divider"></view>
+      <view class="row-between">
+        <view>
+          <view>{{item.title}}</view>
+          <view class="muted">{{item.createText}}</view>
+        </view>
+        <view style="text-align:right">
+          <view class="price" style="font-size:34rpx">¥{{item.payAmount}}</view>
+          <view class="muted" wx:if="{{item.discountAmount > 0}}">已省 ¥{{item.discountAmount}}</view>
+        </view>
+      </view>
+      <view wx:if="{{item.canCancel}}" style="margin-top:18rpx;text-align:right">
+        <button class="btn-ghost cancel-btn" data-no="{{item.orderNo}}" bindtap="cancelOrder">取消订单</button>
+      </view>
+    </view>
+    <view class="empty" wx:if="{{orders.length === 0}}">还没有订单</view>
+  </block>
+
+  <!-- 我的券 -->
+  <block wx:else>
+    <view class="card">
+      <view class="row">
+        <view class="chip {{couponFilter === -1 ? 'chip-active' : ''}}" data-status="-1" bindtap="filterCoupon">全部</view>
+        <view class="chip {{couponFilter === 0 ? 'chip-active' : ''}}" data-status="0" bindtap="filterCoupon">未使用</view>
+        <view class="chip {{couponFilter === 1 ? 'chip-active' : ''}}" data-status="1" bindtap="filterCoupon">已使用</view>
+        <view class="chip {{couponFilter === 2 ? 'chip-active' : ''}}" data-status="2" bindtap="filterCoupon">已过期</view>
+      </view>
+    </view>
+    <view class="card" wx:for="{{coupons}}" wx:key="id">
+      <view class="row-between">
+        <view>
+          <view class="title">{{item.title}}</view>
+          <view class="muted">满 {{item.threshold}} 减 {{item.amount}} · 有效期至 {{item.expireText}}</view>
+        </view>
+        <text class="tag {{item.status === 0 ? '' : 'tag-red'}}">{{item.statusText}}</text>
+      </view>
+    </view>
+    <view class="empty" wx:if="{{coupons.length === 0}}">还没有券，去首页领一张</view>
+    <view style="text-align:center;margin:24rpx">
+      <text style="color:#2F7FD1" bindtap="goIndex">去领券中心 ></text>
+    </view>
+  </block>
+
+  <view style="height:40rpx"></view>
+</view>

@@ -1,0 +1,21 @@
+.coupon-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22rpx 0;
+  border-bottom: 2rpx solid #F2F2F2;
+}
+
+.coupon-row:last-child {
+  border-bottom: none;
+}
+
+.radio {
+  color: #2F7FD1;
+  font-size: 34rpx;
+}
+
+.submit-btn {
+  width: 300rpx;
+  margin: 0;
+}

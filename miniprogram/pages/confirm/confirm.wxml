@@ -1,0 +1,80 @@
+<!-- 确认订单 -->
+<view class="page" wx:if="{{preview}}">
+  <view class="card">
+    <view class="row-between">
+      <text class="title">订单内容</text>
+      <text class="tag">{{preview.itemType === 1 ? '观影券' : '会员套餐'}}</text>
+    </view>
+    <view class="divider"></view>
+    <view class="row-between">
+      <text>{{preview.itemName}}</text>
+      <text>x1</text>
+    </view>
+  </view>
+
+  <!-- 选券 -->
+  <view class="card" wx:if="{{coupons.length > 0}}">
+    <view class="row-between">
+      <text class="title">选择优惠券</text>
+      <text class="muted">{{coupons.length}} 张可用</text>
+    </view>
+    <view class="divider"></view>
+
+    <view class="coupon-row" data-id="0" bindtap="choose">
+      <text>不使用优惠券</text>
+      <text class="radio">{{selectedId === 0 ? '●' : '○'}}</text>
+    </view>
+
+    <view class="coupon-row" wx:for="{{coupons}}" wx:key="id" data-id="{{item.id}}" bindtap="choose">
+      <view>
+        <view>{{item.title}}</view>
+        <view class="muted">满 {{item.threshold}} 减 {{item.amount}} · 有效期至 {{item.expireTime}}</view>
+      </view>
+      <text class="radio">{{selectedId === item.id ? '●' : '○'}}</text>
+    </view>
+  </view>
+
+  <view class="card" wx:else>
+    <view class="muted">这一单没有可用的优惠券（去首页领券中心看看）</view>
+  </view>
+
+  <!-- 价格明细 -->
+  <view class="card">
+    <view class="row-between">
+      <text class="muted">商品原价</text>
+      <text>¥{{preview.originalPrice}}</text>
+    </view>
+    <view class="row-between" style="margin-top:14rpx" wx:if="{{preview.member}}">
+      <text class="muted">会员 8 折</text>
+      <text class="price">-¥{{preview.memberDiscount}}</text>
+    </view>
+    <view class="row-between" style="margin-top:14rpx" wx:if="{{selectedId > 0}}">
+      <text class="muted">优惠券</text>
+      <text class="price">已抵扣</text>
+    </view>
+    <view class="divider"></view>
+    <view class="row-between">
+      <text class="title">实付</text>
+      <text class="price" style="font-size:40rpx">¥{{payAmount}}</text>
+    </view>
+    <view class="muted" style="margin-top:12rpx">共省 ¥{{saving}}</view>
+  </view>
+
+  <view class="muted" style="margin:0 24rpx">
+    演示版下单即视为支付成功（不接微信支付）。正式上线需要企业主体 + 微信支付商户号。
+  </view>
+
+  <view style="height:180rpx"></view>
+
+  <view class="footer-bar row-between">
+    <view>
+      <text class="muted">实付</text>
+      <text class="price" style="font-size:38rpx;margin-left:10rpx">¥{{payAmount}}</text>
+    </view>
+    <button class="btn-primary submit-btn" bindtap="submit" disabled="{{submitting}}">
+      {{submitting ? '提交中...' : '提交订单'}}
+    </button>
+  </view>
+</view>
+
+<view class="empty" wx:else>正在算价...</view>

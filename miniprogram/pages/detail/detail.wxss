@@ -1,0 +1,29 @@
+.head {
+  display: flex;
+  padding: 30rpx 24rpx;
+  background: #FFFFFF;
+}
+
+.head-poster {
+  width: 200rpx;
+  height: 290rpx;
+  border-radius: 12rpx;
+  background: #EDEDED;
+}
+
+.head-info {
+  flex: 1;
+  margin-left: 24rpx;
+}
+
+.head-name {
+  font-size: 36rpx;
+  font-weight: 600;
+  margin-bottom: 10rpx;
+}
+
+.overview {
+  font-size: 27rpx;
+  line-height: 44rpx;
+  color: #444444;
+}
