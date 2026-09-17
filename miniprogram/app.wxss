@@ -1,0 +1,107 @@
+/* 全局样式：和 movie-system 后台的蓝色主色调保持一致 */
+page {
+  background: #F5F6F8;
+  font-size: 28rpx;
+  color: #222222;
+}
+
+.card {
+  background: #FFFFFF;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin: 20rpx 24rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+}
+
+.row-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.title {
+  font-size: 32rpx;
+  font-weight: 600;
+}
+
+.muted {
+  color: #8A8F99;
+  font-size: 24rpx;
+}
+
+.price {
+  color: #E64545;
+  font-weight: 600;
+}
+
+.btn-primary {
+  background: #2F7FD1;
+  color: #FFFFFF;
+  border-radius: 44rpx;
+  font-size: 30rpx;
+  line-height: 84rpx;
+  height: 84rpx;
+}
+
+.btn-primary[disabled] {
+  background: #B9CDE3;
+  color: #FFFFFF;
+}
+
+.btn-ghost {
+  background: #FFFFFF;
+  color: #2F7FD1;
+  border: 2rpx solid #2F7FD1;
+  border-radius: 44rpx;
+  font-size: 28rpx;
+}
+
+.tag {
+  display: inline-block;
+  padding: 2rpx 12rpx;
+  border-radius: 6rpx;
+  background: #EEF4FB;
+  color: #2F7FD1;
+  font-size: 22rpx;
+  margin-right: 10rpx;
+}
+
+.tag-red {
+  background: #FDECEC;
+  color: #E64545;
+}
+
+.poster {
+  width: 140rpx;
+  height: 200rpx;
+  border-radius: 10rpx;
+  background: #EDEDED;
+}
+
+.divider {
+  height: 2rpx;
+  background: #EEEEEE;
+  margin: 20rpx 0;
+}
+
+.empty {
+  text-align: center;
+  color: #AAAAAA;
+  font-size: 26rpx;
+  padding: 60rpx 0;
+}
+
+.footer-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #FFFFFF;
+  padding: 16rpx 24rpx calc(16rpx + env(safe-area-inset-bottom));
+  box-shadow: 0 -2rpx 12rpx rgba(0, 0, 0, 0.05);
+}

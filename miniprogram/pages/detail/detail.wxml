@@ -1,0 +1,54 @@
+<!-- 影片详情 -->
+<view class="page" wx:if="{{detail}}">
+  <view class="head">
+    <image class="head-poster" src="{{base}}/posters/{{videoId}}.jpg" mode="aspectFill"></image>
+    <view class="head-info">
+      <view class="head-name">{{detail.videoName}}</view>
+      <view class="muted">{{detail.originalTitle}}</view>
+      <view class="row" style="margin-top:16rpx">
+        <text class="tag tag-red">评分 {{detail.voteAverage}}</text>
+        <text class="tag">热度 {{detail.popularity}}</text>
+      </view>
+      <view class="muted" style="margin-top:16rpx">
+        {{detail.releaseDate ? '上映 ' + detail.releaseDate : ''}}
+      </view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="row-between">
+      <text class="title">观影券</text>
+      <text class="muted" bindtap="goMember">{{preview && preview.member ? '会员 8 折已生效' : '开通会员打 8 折 >'}}</text>
+    </view>
+    <view class="divider"></view>
+    <view class="row-between">
+      <text class="muted">原价</text>
+      <text>¥{{preview ? preview.originalPrice : '--'}}</text>
+    </view>
+    <view class="row-between" style="margin-top:14rpx" wx:if="{{preview && preview.member}}">
+      <text class="muted">会员省</text>
+      <text class="price">-¥{{preview.memberDiscount}}</text>
+    </view>
+    <view class="row-between" style="margin-top:14rpx">
+      <text class="muted">券后最低</text>
+      <text class="price">¥{{finalPrice}}</text>
+    </view>
+    <view class="muted" style="margin-top:12rpx" wx:if="{{couponCount > 0}}">
+      有 {{couponCount}} 张券可用于这一单
+    </view>
+  </view>
+
+  <view class="card">
+    <text class="title">剧情简介</text>
+    <view class="divider"></view>
+    <view class="overview">{{detail.overview || '暂无简介'}}</view>
+  </view>
+
+  <view style="height:160rpx"></view>
+
+  <view class="footer-bar">
+    <button class="btn-primary" bindtap="buy">立即购买</button>
+  </view>
+</view>
+
+<view class="empty" wx:else>{{loading ? '加载中...' : err}}</view>

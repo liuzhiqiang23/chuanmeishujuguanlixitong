@@ -1,0 +1,86 @@
+.member-bar {
+  margin: 20rpx 24rpx;
+  padding: 30rpx 28rpx;
+  border-radius: 16rpx;
+  background: linear-gradient(135deg, #2F7FD1, #4E9BE8);
+  color: #FFFFFF;
+}
+
+.member-title {
+  font-size: 34rpx;
+  font-weight: 600;
+}
+
+.member-sub {
+  font-size: 24rpx;
+  opacity: 0.85;
+  margin-top: 8rpx;
+}
+
+.member-btn {
+  background: #FFFFFF;
+  color: #2F7FD1;
+  font-size: 26rpx;
+  padding: 10rpx 28rpx;
+  border-radius: 40rpx;
+}
+
+.coupon-item {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 2rpx solid #F2F2F2;
+}
+
+.coupon-item:last-child {
+  border-bottom: none;
+}
+
+.coupon-left {
+  width: 150rpx;
+  text-align: center;
+  border-right: 2rpx dashed #E5E5E5;
+  margin-right: 20rpx;
+}
+
+.coupon-amount {
+  color: #E64545;
+  font-size: 40rpx;
+  font-weight: 600;
+}
+
+.coupon-mid {
+  flex: 1;
+}
+
+.coupon-btn {
+  background: #E64545;
+  color: #FFFFFF;
+  font-size: 26rpx;
+  padding: 10rpx 26rpx;
+  border-radius: 40rpx;
+}
+
+.video-item {
+  display: flex;
+  padding: 20rpx 0;
+  border-bottom: 2rpx solid #F2F2F2;
+}
+
+.video-item:last-child {
+  border-bottom: none;
+}
+
+.video-info {
+  flex: 1;
+  margin-left: 20rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.video-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  margin-bottom: 8rpx;
+}

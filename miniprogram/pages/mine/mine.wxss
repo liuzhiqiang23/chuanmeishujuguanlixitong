@@ -1,0 +1,56 @@
+.user-bar {
+  margin: 20rpx 24rpx;
+  padding: 34rpx 28rpx;
+  border-radius: 16rpx;
+  background: linear-gradient(135deg, #2F7FD1, #4E9BE8);
+  color: #FFFFFF;
+}
+
+.user-name {
+  font-size: 36rpx;
+  font-weight: 600;
+  margin-bottom: 10rpx;
+}
+
+.bar-btn {
+  background: rgba(255, 255, 255, 0.22);
+  color: #FFFFFF;
+  font-size: 24rpx;
+  padding: 10rpx 24rpx;
+  border-radius: 40rpx;
+}
+
+.tab {
+  flex: 1;
+  text-align: center;
+  padding: 18rpx 0;
+  color: #8A8F99;
+  font-size: 30rpx;
+}
+
+.tab-active {
+  color: #2F7FD1;
+  font-weight: 600;
+  border-bottom: 4rpx solid #2F7FD1;
+}
+
+.chip {
+  padding: 10rpx 28rpx;
+  border-radius: 40rpx;
+  background: #F2F4F7;
+  color: #666666;
+  font-size: 26rpx;
+  margin-right: 16rpx;
+}
+
+.chip-active {
+  background: #2F7FD1;
+  color: #FFFFFF;
+}
+
+.cancel-btn {
+  display: inline-block;
+  padding: 0 30rpx;
+  line-height: 60rpx;
+  font-size: 26rpx;
+}

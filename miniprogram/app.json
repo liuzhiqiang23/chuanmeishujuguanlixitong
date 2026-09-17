@@ -1,0 +1,26 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/member/member",
+    "pages/mine/mine",
+    "pages/detail/detail",
+    "pages/confirm/confirm"
+  ],
+  "window": {
+    "navigationBarTitleText": "电影商城",
+    "navigationBarBackgroundColor": "#2F7FD1",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#F5F6F8"
+  },
+  "tabBar": {
+    "color": "#8A8F99",
+    "selectedColor": "#2F7FD1",
+    "backgroundColor": "#FFFFFF",
+    "list": [
+      { "pagePath": "pages/index/index", "text": "首页" },
+      { "pagePath": "pages/member/member", "text": "会员" },
+      { "pagePath": "pages/mine/mine", "text": "我的" }
+    ]
+  },
+  "sitemapLocation": "sitemap.json"
+}

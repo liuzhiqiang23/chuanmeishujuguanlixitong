@@ -1,0 +1,62 @@
+<!-- 首页 -->
+<view class="page">
+  <!-- 会员状态条 -->
+  <view class="member-bar" bindtap="goMember">
+    <view class="row-between">
+      <view>
+        <view class="member-title">
+          {{member && member.isMember ? '会员卡生效中' : '开通会员，影片 8 折'}}
+        </view>
+        <view class="member-sub">
+          {{member && member.isMember ? '有效期至 ' + member.expireTime : '月卡 15 元起 · 观影券打折'}}
+        </view>
+      </view>
+      <view class="member-btn">
+        {{member && member.isMember ? '续费' : '去开通'}}
+      </view>
+    </view>
+  </view>
+
+  <!-- 可领券 -->
+  <view class="card" wx:if="{{coupons.length > 0}}">
+    <view class="row-between">
+      <text class="title">领券中心</text>
+      <text class="muted" bindtap="goMine">我的券 ></text>
+    </view>
+    <view class="coupon-item" wx:for="{{coupons}}" wx:key="id">
+      <view class="coupon-left">
+        <view class="coupon-amount">¥{{item.amount}}</view>
+        <view class="muted">{{item.threshold > 0 ? '满' + item.threshold + '可用' : '无门槛'}}</view>
+      </view>
+      <view class="coupon-mid">
+        <view>{{item.title}}</view>
+        <view class="muted">领取后 {{item.validDays}} 天内有效</view>
+      </view>
+      <view class="coupon-btn" data-id="{{item.id}}" bindtap="receiveCoupon">领取</view>
+    </view>
+  </view>
+
+  <!-- 影片列表 -->
+  <view class="card">
+    <view class="row-between">
+      <text class="title">热门影片</text>
+      <text class="muted">{{status}}</text>
+    </view>
+    <view class="divider"></view>
+    <view class="video-item" wx:for="{{videos}}" wx:key="videoId"
+          data-id="{{item.videoId}}" bindtap="goDetail">
+      <image class="poster" src="{{base}}/posters/{{item.videoId}}.jpg" mode="aspectFill" lazy-load></image>
+      <view class="video-info">
+        <view class="video-name">{{item.videoName}}</view>
+        <view class="muted">评分 {{item.voteAverage}} · 热度 {{item.popularity}}</view>
+        <view class="row" style="margin-top:12rpx">
+          <text class="tag">观影券</text>
+          <text class="price">¥{{item.price}}</text>
+        </view>
+      </view>
+    </view>
+    <view class="empty" wx:if="{{videos.length === 0}}">{{loading ? '加载中...' : '暂无影片'}}</view>
+  </view>
+
+  <view style="height:40rpx"></view>
+</view>
