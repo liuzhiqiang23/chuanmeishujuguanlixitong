@@ -45,12 +45,15 @@ system:
     - /api/student/user/register
     - /api/admin/video/**
   pwdKey:
+    # 登录密码用这对 RSA 密钥加解密，必须用环境变量注入，不要提交进 git。
+    # 生成：openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out priv.pem
+    #       openssl rsa -in priv.pem -pubout
+    # 环境变量：PWD_KEY_PUBLIC_KEY / PWD_KEY_PRIVATE_KEY
     publicKey: ${PWD_KEY_PUBLIC_KEY:}
     privateKey: ${PWD_KEY_PRIVATE_KEY:}
   wx:
-    # 下面两个还是模板作者自带的凭证。换成自己的小程序 appid/secret 后，
-    # 登录就会自动走微信官方 code2session（openid 才稳定）；不换则退回演示模式。
-    # 建议用环境变量注入，别把 secret 提交进 git：WX_APPID / WX_SECRET
+    # 必须用环境变量注入，不要提交进 git：WX_APPID / WX_SECRET
+    # 配好后登录走微信官方 code2session（openid 才稳定）；留空则退回演示模式。
     appid: ${WX_APPID:}
     secret: ${WX_SECRET:}
     # 管理员白名单（微信 openid，逗号分隔）。这几个号登录后自动是管理员，
