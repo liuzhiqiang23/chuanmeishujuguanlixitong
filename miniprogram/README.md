@@ -1,5 +1,7 @@
 # movie-system 小程序端（会员 / 优惠券 / 订单）
 
+> 注：仓库里的后端域名、服务器 IP、小程序 AppID 均为**占位符**，运行前请改成你自己的（见 `app.js` 的 `API_BASES` 与 `project.config.json` 的 `appid`）。
+
 原生微信小程序（WXML + WXSS + JS），复用 movie-system 已有的 Spring Boot 后端。
 **不新建商品表**：影片本身就是商品，会员套餐写在代码常量里。
 
