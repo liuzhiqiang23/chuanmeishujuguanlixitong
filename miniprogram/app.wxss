@@ -105,3 +105,54 @@ page {
   padding: 16rpx 24rpx calc(16rpx + env(safe-area-inset-bottom));
   box-shadow: 0 -2rpx 12rpx rgba(0, 0, 0, 0.05);
 }
+
+/* 列表项右侧箭头：暗示整行可点进详情 */
+.chevron {
+  margin-left: auto;
+  padding-left: 16rpx;
+  color: #C8CDD4;
+  font-size: 42rpx;
+  line-height: 1;
+}
+
+/* ---------- 影片列表项：三个页面（首页/分类/搜索）共用，必须放全局 ----------
+   教训：页面级 wxss 不共享，写进 index.wxss 的话分类页和搜索页拿不到样式，
+   flex 布局会失效、退化成块级堆叠，海报占满整行、右边留一大片空白。 */
+.video-item {
+  display: flex;
+  padding: 20rpx 0;
+  border-bottom: 2rpx solid #F2F2F2;
+}
+
+.video-item:last-child {
+  border-bottom: none;
+}
+
+.video-info {
+  flex: 1;
+  min-width: 0;
+  margin-left: 20rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.video-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  margin-bottom: 8rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 管理员的删除按钮：靠右对齐，跟价格拉开距离，别和箭头糊在一起 */
+.del-btn {
+  margin-left: auto;
+  padding: 4rpx 22rpx;
+  border: 1rpx solid #E55A5A;
+  border-radius: 26rpx;
+  color: #E55A5A;
+  font-size: 24rpx;
+  line-height: 1.6;
+}

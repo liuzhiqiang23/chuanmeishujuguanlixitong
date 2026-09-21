@@ -1,0 +1,29 @@
+/* 分类页：顶部横向标签栏 */
+.cate-bar {
+  white-space: nowrap;
+  background: #FFFFFF;
+  padding: 18rpx 12rpx;
+  margin-bottom: 16rpx;
+}
+
+.cate-item {
+  display: inline-flex;
+  align-items: center;
+  padding: 12rpx 24rpx;
+  margin: 0 8rpx;
+  border-radius: 32rpx;
+  background: #F2F3F5;
+  color: #4A4F57;
+  font-size: 26rpx;
+}
+
+.cate-item-active {
+  background: #2F7FD1;
+  color: #FFFFFF;
+}
+
+.cate-count {
+  margin-left: 8rpx;
+  font-size: 20rpx;
+  opacity: 0.7;
+}

@@ -16,6 +16,17 @@
     </view>
   </view>
 
+  <!-- 管理员：靠后端白名单（wx.admin-open-ids）授予，前端只负责显示 -->
+  <view class="card" wx:if="{{isAdmin}}">
+    <view class="row-between">
+      <view>
+        <view class="title">管理员模式</view>
+        <view class="muted">去搜索页，可以对影片点「删除」</view>
+      </view>
+      <text class="tag">已激活</text>
+    </view>
+  </view>
+
   <!-- 切换 -->
   <view class="card">
     <view class="row">

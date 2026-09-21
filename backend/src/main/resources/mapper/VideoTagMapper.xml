@@ -37,4 +37,36 @@
       </if>
     </trim>
   </insert>
+
+  <!-- 分类导航：按关联影片数倒序取标签，只保留影片数 >= minCount 的 -->
+  <select id="selectTopTags" resultType="java.util.Map">
+    SELECT t.tag_id AS tagId, t.tag_name AS tagName, COUNT(DISTINCT vt.video_id) AS videoCount
+    FROM t_tag t
+    JOIN t_video_tag vt ON vt.tag_id = t.tag_id
+    GROUP BY t.tag_id, t.tag_name
+    HAVING videoCount >= #{minCount}
+    ORDER BY videoCount DESC
+    LIMIT #{limit}
+  </select>
+
+  <select id="countVideosByTag" resultType="int">
+    SELECT COUNT(DISTINCT vt.video_id)
+    FROM t_video_tag vt
+    WHERE vt.tag_id = #{tagId}
+  </select>
+
+  <select id="selectVideosByTag" resultType="com.alvis.media.domain.VideoInfo">
+    SELECT v.video_id, v.video_name, v.original_title, v.overview, v.tagline,
+           v.budget, v.revenue, v.popularity, v.vote_average, v.vote_count,
+           v.runtime, v.release_date, v.original_language, v.poster_path, v.heat_score
+    FROM t_video_info v
+    JOIN t_video_tag vt ON vt.video_id = v.video_id
+    WHERE vt.tag_id = #{tagId}
+    ORDER BY v.heat_score DESC, v.popularity DESC
+    LIMIT #{offset}, #{size}
+  </select>
+
+  <delete id="deleteByVideoId">
+    DELETE FROM t_video_tag WHERE video_id = #{videoId}
+  </delete>
 </mapper>

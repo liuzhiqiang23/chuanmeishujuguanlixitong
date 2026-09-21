@@ -60,4 +60,14 @@ public interface VideoInfoMapper extends MediaBaseMapper <VideoInfo> {
     List<VideoInfo> selectAll();
 
     List<VideoInfo> selectByIds(@Param("ids") List<Integer> ids);
+
+    /** 搜索：片名/原名模糊匹配，热度倒序 */
+    List<VideoInfo> searchByKeyword(@Param("keyword") String keyword,
+                                    @Param("offset") int offset,
+                                    @Param("size") int size);
+
+    int countByKeyword(@Param("keyword") String keyword);
+
+    /** 真删：连 t_video_tag / t_user_video_operation 的关联一起清掉 */
+    int deleteVideoById(@Param("videoId") Integer videoId);
 }

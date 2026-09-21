@@ -1,0 +1,41 @@
+/* 搜索页：搜索栏 + 历史标签云 */
+.search-bar {
+  display: flex;
+  align-items: center;
+  background: #FFFFFF;
+  padding: 20rpx 24rpx;
+  margin-bottom: 16rpx;
+}
+
+.search-input {
+  flex: 1;
+  height: 72rpx;
+  background: #F2F3F5;
+  border-radius: 36rpx;
+  padding: 0 28rpx;
+  font-size: 28rpx;
+}
+
+.search-btn {
+  margin-left: 20rpx;
+  color: #2F7FD1;
+  font-size: 30rpx;
+  padding: 0 8rpx;
+}
+
+.history-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  padding-top: 8rpx;
+}
+
+.history-tag {
+  padding: 12rpx 26rpx;
+  margin: 12rpx 16rpx 0 0;
+  background: #F2F3F5;
+  border-radius: 32rpx;
+  color: #4A4F57;
+  font-size: 26rpx;
+}
+
+/* 管理员删除按钮 */

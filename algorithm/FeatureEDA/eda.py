@@ -213,7 +213,7 @@ def fig04_movies_by_year(df):
     # 5 年移动平均
     ma = yearly.rolling(5, center=True).mean()
     ax.plot(ma.index, ma.values, "crimson", lw=2.5, marker="o", ms=4, label="5年移动平均")
-    ax.set_title("每年上映电影数量（1976–2026，样本内）")
+    ax.set_title(f"每年上映电影数量（{int(yearly.index.min())}–{int(yearly.index.max())}，样本内）")
     ax.set_xlabel("年份")
     ax.set_ylabel("上映数量（部）")
     ax.grid(axis="y", alpha=0.3)
@@ -512,24 +512,10 @@ def fig14_top_keywords(df):
 # ---------------------------------------------------------------------------
 # 15~21. 单特征 / 相关性图
 #        说明：原 single_feature_visual.py 的绘图内容已合并到本脚本，
-#        使用原始 data/train.csv 并外链上映规模(theatrical)与热度(popularity2)；
-#        这 7 张采用**固定文件名**（前端「特征探索分析」页面按文件名引用），
-#        因此不走 next_fig 序号，改用 fixed_fig 以便统一计数。
+#        使用原始 data/train.csv（新数据集自带 popularity / vote_average /
+#        vote_count 列）；这 7 张采用**固定文件名**（前端「特征探索分析」
+#        页面按文件名引用），因此不走 next_fig 序号，改用 fixed_fig 统一计数。
 # ---------------------------------------------------------------------------
-
-# 原始数据里 budget/revenue 的明显异常值人工核对修正（沿用原脚本核对结果）
-# 注：原脚本对 test 的 budget 修正未参与任何绘图，此处不再保留
-_SF_BUDGET_FIX = {
-    90: 30000000, 118: 60000000, 149: 18000000, 464: 20000000, 470: 13000000,
-    513: 1100000, 797: 8000000, 819: 90000000, 850: 1500000, 1007: 2,
-    1112: 7500000, 1131: 4300000, 1359: 10000000, 1542: 1, 1570: 15800000,
-    1571: 4000000, 1714: 46000000, 1721: 17500000, 1885: 12, 2091: 10,
-    2268: 17500000, 2491: 6, 2602: 31000000, 2612: 15000000, 2696: 10000000,
-    2801: 10000000, 335: 2, 348: 12, 640: 6, 696: 1, 1199: 5,
-    1282: 9, 1347: 1, 1755: 2, 1801: 5, 1918: 592, 2033: 4,
-    2118: 344, 2252: 130, 2256: 1,
-}
-_SF_REVENUE_FIX = {16: 192864, 313: 12000000, 451: 12000000, 1865: 25000000}
 
 
 def fixed_fig(name: str) -> str:
@@ -540,25 +526,11 @@ def fixed_fig(name: str) -> str:
 
 
 def load_single_feature_data():
-    """加载单特征图所需的 train：合并上映规模 theatrical 与热度 popularity2"""
-    train = pd.read_csv(os.path.join(DATA_DIR, "train.csv"))
-    for i, v in _SF_REVENUE_FIX.items():
-        train.loc[train["id"] == i, "revenue"] = v
-    for i, v in _SF_BUDGET_FIX.items():
-        train.loc[train["id"] == i, "budget"] = v
-
-    # 上映国家表：提供各片的上映规模 theatrical
-    release_dates = pd.read_csv(
-        os.path.join(DATA_DIR, "prediction", "release_dates_per_country.csv"))
-    release_dates["id"] = range(1, len(release_dates) + 1)
-    release_dates.drop(["original_title", "title"], axis=1, inplace=True)
-    train = pd.merge(train, release_dates, how="left", on=["id"])
-
-    # 附加特征表：提供 popularity2（TMDB 热度）与 rating
-    extra = pd.read_csv(
-        os.path.join(DATA_DIR, "prediction", "TrainAdditionalFeatures.csv"))[
-        ["imdb_id", "popularity2", "rating"]]
-    train = pd.merge(train, extra, how="left", on=["imdb_id"])
+    """加载单特征图所需的 train：release_year 由 release_date 派生，
+    popularity / vote 等特征直接取自新数据集列，不再依赖老比赛附加表"""
+    train = pd.read_csv(os.path.join(DATA_DIR, "train.csv"), low_memory=False)
+    train["release_year"] = pd.to_datetime(
+        train["release_date"], format="mixed", errors="coerce").dt.year
     return train
 
 
@@ -576,26 +548,26 @@ def fig15_revenue_budget(df):
 
 def fig16_revenue_popularity(df):
     fig = plt.figure(figsize=(9, 5))
-    plt.scatter(df["popularity2"], df["revenue"], c=["green"], marker="o")
+    plt.scatter(df["popularity"], df["revenue"], c=["green"], marker="o")
     plt.grid()
     plt.xlabel("popularity", fontsize=10)
     plt.ylabel("revenue", fontsize=10)
     plt.title("Link between popularity and revenue", fontsize=10)
-    plt.savefig(fixed_fig("revenue_popularity.png"))
-    plt.close(fig)
-    print(f"[fig16] 票房~热度 相关系数={corr(df['popularity2'], df['revenue']):.3f}")
+    plt.savefig(fixed_fig("revenue_popularity.png"), bbox_inches="tight")
+    plt.close()
+    print(f"[fig16] 票房~热度 相关系数={corr(df['popularity'], df['revenue']):.3f}")
 
 
-def fig17_revenue_theatrical(df):
+def fig17_revenue_vote_count(df):
     fig = plt.figure(figsize=(9, 5))
-    plt.scatter(df["theatrical"], df["revenue"], c=["green"], marker="o")
+    plt.scatter(df["vote_count"], df["revenue"], c=["green"], marker="o")
     plt.grid()
-    plt.xlabel("theatrical", fontsize=10)
+    plt.xlabel("vote_count", fontsize=10)
     plt.ylabel("revenue", fontsize=10)
-    plt.title("Link between theatrical and revenue", fontsize=10)
-    plt.savefig(fixed_fig("revenue_theatrical.png"))
-    plt.close(fig)
-    print(f"[fig17] 票房~上映规模 相关系数={corr(df['theatrical'], df['revenue']):.3f}")
+    plt.title("Link between vote_count and revenue", fontsize=10)
+    plt.savefig(fixed_fig("revenue_theatrical.png"), bbox_inches="tight")
+    plt.close()
+    print(f"[fig17] 票房~评分人数 相关系数={corr(df['vote_count'], df['revenue']):.3f}")
 
 
 def fig18_revenue_language(df):
@@ -635,11 +607,11 @@ def fig20_revenue_year(df):
 
 
 def fig21_corre(df):
-    col = ["revenue", "budget", "popularity2", "theatrical", "runtime",
-           "id", "release_year"]
+    col = ["revenue", "budget", "popularity", "vote_average", "vote_count",
+           "runtime", "id", "release_year"]
     plt.subplots(figsize=(14, 10))
     sns.heatmap(df[col].corr(), xticklabels=col, yticklabels=col,
-                linewidths=.5, cmap="Reds")
+                linewidths=.5, cmap="Reds", annot=True, fmt=".2f")
     plt.savefig(fixed_fig("corre.png"), bbox_inches="tight")
     plt.close()
     print("[fig21] 特征相关性热力图")
@@ -674,7 +646,7 @@ def main():
     sf_train = load_single_feature_data()
     fig15_revenue_budget(sf_train)
     fig16_revenue_popularity(sf_train)
-    fig17_revenue_theatrical(sf_train)
+    fig17_revenue_vote_count(sf_train)
     fig18_revenue_language(sf_train)
     fig19_budget_recent_year(sf_train)
     fig20_revenue_year(sf_train)

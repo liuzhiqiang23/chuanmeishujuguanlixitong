@@ -5,6 +5,7 @@ import com.alvis.media.domain.UserCoupon;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 优惠券：可领列表、我的券、领券、下单核销、取消订单退券。
@@ -34,4 +35,19 @@ public interface CouponService {
 
     /** 取消订单时把券退回去 */
     void restoreByOrderNo(String orderNo);
+
+    /**
+     * 好友通过分享卡片进来领券：被分享者必得一张，分享者也补一张当奖励。
+     * 同一对（分享者, 被分享者）只发一次，重复调用抛 IllegalArgumentException。
+     *
+     * @return 券名、面额、是否给分享者也发了
+     */
+    Map<String, Object> receiveByShare(Integer receiverId, Integer sharerId);
+
+    /**
+     * 分享动作本身的奖励：用户把小程序分享出去时给自己发一张「分享奖励券」。
+     * 每人限领 1 张（复用 receive 的限领规则），没配这张券或已领过都返回 null，
+     * 不影响分享本身。
+     */
+    Coupon claimShareReward(Integer userId);
 }

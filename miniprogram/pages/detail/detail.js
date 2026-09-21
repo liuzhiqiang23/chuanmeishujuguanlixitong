@@ -9,15 +9,36 @@ Page({
     preview: null,
     finalPrice: '--',
     couponCount: 0,
+    posterSrc: '',
     loading: true,
     err: ''
   },
 
   onLoad(options) {
     const videoId = Number(options.videoId || 0);
-    this.setData({ base: api.baseUrl(), videoId: videoId });
+    const base = api.baseUrl();
+    this.setData({
+      base: base,
+      videoId: videoId,
+      posterSrc: base + '/posters/' + videoId + '.jpg?v=2'
+    });
+    this.cachePoster();
     this.loadDetail();
     this.loadPreview();
+  },
+
+  /** 同首页：真机 <image> 引不了 http 图，先 downloadFile 到本地再显示 */
+  cachePoster() {
+    const url = this.data.posterSrc;
+    wx.downloadFile({
+      url: url,
+      success: (r) => {
+        if (r.statusCode === 200 && r.tempFilePath) {
+          this.setData({ posterSrc: r.tempFilePath });
+        }
+      },
+      fail: () => {}
+    });
   },
 
   loadDetail() {
@@ -44,6 +65,24 @@ Page({
 
   buy() {
     wx.navigateTo({ url: '/pages/confirm/confirm?videoId=' + this.data.videoId });
+  },
+
+  /**
+   * 点海报看大图。urls 用本地临时路径（cachePoster 下好的），
+   * 真机上 http 图片既进不了 <image> 也进不了 previewImage，只有本地文件能用。
+   */
+  previewPoster() {
+    const src = this.data.posterSrc;
+    if (!src) {
+      return;
+    }
+    wx.previewImage({
+      urls: [src],
+      current: src,
+      fail: () => {
+        wx.showToast({ title: '图片还没加载完，稍后再点', icon: 'none' });
+      }
+    });
   },
 
   goMember() {
