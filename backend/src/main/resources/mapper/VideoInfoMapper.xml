@@ -397,4 +397,25 @@
     <foreach collection="ids" item="id" open="(" separator="," close=")">#{id}</foreach>
   </select>
 
+  <!-- 搜索：片名或原名模糊匹配，热度倒序 -->
+  <select id="searchByKeyword" resultMap="BaseResultMap">
+    SELECT <include refid="Base_Column_List"/>
+    FROM t_video_info
+    WHERE video_name LIKE CONCAT('%', #{keyword}, '%')
+       OR original_title LIKE CONCAT('%', #{keyword}, '%')
+    ORDER BY heat_score DESC, popularity DESC
+    LIMIT #{offset}, #{size}
+  </select>
+
+  <select id="countByKeyword" resultType="int">
+    SELECT COUNT(*)
+    FROM t_video_info
+    WHERE video_name LIKE CONCAT('%', #{keyword}, '%')
+       OR original_title LIKE CONCAT('%', #{keyword}, '%')
+  </select>
+
+  <delete id="deleteVideoById">
+    DELETE FROM t_video_info WHERE video_id = #{videoId}
+  </delete>
+
 </mapper>

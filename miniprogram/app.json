@@ -1,16 +1,22 @@
 {
   "pages": [
     "pages/index/index",
+    "pages/category/category",
+    "pages/search/search",
     "pages/member/member",
     "pages/mine/mine",
     "pages/detail/detail",
     "pages/confirm/confirm"
   ],
   "window": {
-    "navigationBarTitleText": "电影商城",
+    "navigationBarTitleText": "电影票务演示",
     "navigationBarBackgroundColor": "#2F7FD1",
     "navigationBarTextStyle": "white",
     "backgroundColor": "#F5F6F8"
+  },
+  "networkTimeout": {
+    "request": 15000,
+    "downloadFile": 30000
   },
   "tabBar": {
     "color": "#8A8F99",

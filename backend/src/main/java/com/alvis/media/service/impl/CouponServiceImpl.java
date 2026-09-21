@@ -1,21 +1,26 @@
 package com.alvis.media.service.impl;
 
 import com.alvis.media.domain.Coupon;
+import com.alvis.media.domain.CouponShare;
 import com.alvis.media.domain.UserCoupon;
 import com.alvis.media.repository.CouponMapper;
+import com.alvis.media.repository.CouponShareMapper;
 import com.alvis.media.repository.UserCouponMapper;
 import com.alvis.media.service.CouponService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -26,9 +31,14 @@ import java.util.Set;
 @AllArgsConstructor
 public class CouponServiceImpl implements CouponService {
 
+    /** 分享奖励券的标题。用它定位券模板，面额/有效期在后台改券即可，不用动代码 */
+    private static final String SHARE_REWARD_TITLE = "分享奖励券";
+
     private final CouponMapper couponMapper;
 
     private final UserCouponMapper userCouponMapper;
+
+    private final CouponShareMapper couponShareMapper;
 
     @Override
     public List<Coupon> available(Integer userId) {
@@ -180,6 +190,86 @@ public class CouponServiceImpl implements CouponService {
                 .set(UserCoupon::getStatus, UserCoupon.STATUS_UNUSED)
                 .set(UserCoupon::getUseTime, null)
                 .set(UserCoupon::getOrderNo, null));
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Map<String, Object> receiveByShare(Integer receiverId, Integer sharerId) {
+        if (receiverId == null || sharerId == null) {
+            throw new IllegalArgumentException("分享参数不完整");
+        }
+        if (receiverId.equals(sharerId)) {
+            throw new IllegalArgumentException("不能领自己分享的券");
+        }
+        Long existed = couponShareMapper.selectCount(new LambdaQueryWrapper<CouponShare>()
+                .eq(CouponShare::getSharerId, sharerId)
+                .eq(CouponShare::getReceiverId, receiverId));
+        if (existed != null && existed > 0) {
+            throw new IllegalArgumentException("你已经领过这位好友分享的券了");
+        }
+
+        Coupon shareCoupon = pickShareCoupon();
+        if (shareCoupon == null) {
+            throw new IllegalArgumentException("暂时没有可领取的券");
+        }
+
+        // 被分享者必得
+        UserCoupon got = receive(receiverId, shareCoupon.getId());
+
+        // 分享者奖励：他可能早就领过同一张券了，发失败就跳过，不能连累被分享者
+        boolean sharerGot = false;
+        try {
+            sharerGot = receive(sharerId, shareCoupon.getId()) != null;
+        } catch (Exception ignore) {
+            // 已经领过 / 券没了，都走这里
+        }
+
+        CouponShare record = new CouponShare();
+        record.setSharerId(sharerId);
+        record.setReceiverId(receiverId);
+        record.setCouponId(shareCoupon.getId());
+        record.setCreateTime(new Date());
+        couponShareMapper.insert(record);
+
+        Map<String, Object> out = new HashMap<>();
+        out.put("title", shareCoupon.getTitle());
+        out.put("amount", shareCoupon.getAmount());
+        out.put("userCouponId", got == null ? null : got.getId());
+        out.put("sharerGot", sharerGot);
+        return out;
+    }
+
+    @Override
+    public Coupon claimShareReward(Integer userId) {
+        Coupon tpl = couponMapper.selectOne(new LambdaQueryWrapper<Coupon>()
+                .eq(Coupon::getTitle, SHARE_REWARD_TITLE)
+                .eq(Coupon::getStatus, 1)
+                .last("limit 1"));
+        if (tpl == null) {
+            return null;
+        }
+        try {
+            receive(userId, tpl.getId());
+        } catch (IllegalArgumentException e) {
+            // 已经领过了 / 券下架了 / 没库存，都不该让分享这个动作失败
+            return null;
+        }
+        return tpl;
+    }
+
+    /** 分享用的券：上架、还有库存的里面挑门槛最低的那张（最好是新人无门槛券） */
+    private Coupon pickShareCoupon() {
+        List<Coupon> list = couponMapper.selectList(new LambdaQueryWrapper<Coupon>()
+                .eq(Coupon::getStatus, 1)
+                .orderByAsc(Coupon::getThreshold));
+        for (Coupon c : list) {
+            boolean unlimited = c.getTotalCount() == null || c.getTotalCount() <= 0;
+            boolean hasStock = c.getReceivedCount() == null || c.getReceivedCount() < c.getTotalCount();
+            if (unlimited || hasStock) {
+                return c;
+            }
+        }
+        return null;
     }
 
     private Date plusDays(Date base, int days) {

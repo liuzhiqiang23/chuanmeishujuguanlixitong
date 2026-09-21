@@ -14,7 +14,9 @@ import com.alvis.media.service.CouponService;
 import com.alvis.media.service.MemberService;
 import com.alvis.media.service.OrderService;
 import com.alvis.media.service.UserService;
-import lombok.AllArgsConstructor;
+import com.alvis.media.utility.WxUtil;
+import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -40,8 +42,21 @@ import java.util.UUID;
  */
 @RestController("WxShopController")
 @RequestMapping(value = "/api/wx")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class WxShopController {
+
+    /** t_user.role：1 = 普通用户，3 = 管理员 */
+    private static final int ROLE_ADMIN = 3;
+
+    @Value("${system.wx.appid:}")
+    private String wxAppid;
+
+    @Value("${system.wx.secret:}")
+    private String wxSecret;
+
+    /** 管理员白名单：这些微信 openid 登录后自动是管理员（逗号分隔） */
+    @Value("${system.wx.admin-open-ids:}")
+    private String adminOpenIds;
 
     private final UserService userService;
 
@@ -65,14 +80,18 @@ public class WxShopController {
         String code = strOf(req, "code");
         String nickName = strOf(req, "nickName");
 
-        // 正式流程在这里用 code 调微信 code2session 换 openid（需要小程序 appid + secret）。
-        // 演示模式没有 appid，就用 code 派生一个稳定的 openid：
-        // 同一个 code 反复登录会落到同一个账号，方便调试。
-        String openid = "demo_openid_" + (code == null || code.isEmpty() ? "default" : code);
+        // 配了自己的 appid/secret 就走微信官方 code2session，openid 才稳定；
+        // 还是模板作者那套（或没配）就退回演示模式，免得连登录都进不来。
+        String openid = resolveOpenId(code);
 
         User user = userService.selectByWxOpenId(openid);
         if (user == null) {
             user = registerByOpenid(openid, nickName);
+        }
+        // 白名单里的微信号登录即管理员，不用任何激活码
+        if (isWhitelistedAdmin(openid) && (user.getRole() == null || user.getRole() != ROLE_ADMIN)) {
+            user.setRole(ROLE_ADMIN);
+            userService.updateById(user);
         }
 
         Member member = memberService.getValidMember(user.getId());
@@ -83,12 +102,44 @@ public class WxShopController {
         data.put("token", "demo-token-" + user.getId() + "-" + UUID.randomUUID().toString().substring(0, 8));
         data.put("isMember", member != null);
         data.put("memberExpireTime", member == null ? null : member.getExpireTime());
+        // 管理员（t_user.role == 3）才能在小程序里删影片，前端按这个标记决定要不要显示删除按钮
+        data.put("isAdmin", user.getRole() != null && user.getRole() == ROLE_ADMIN);
         return RestResponse.ok(data);
     }
 
+    /**
+     * 把 wx.login 的 code 换成 openid。
+     * 配好了自己的 appid/secret 才走微信官方 code2session；否则退回演示模式，
+     * 用 code 派生一个假 openid，保证没配凭证时整套流程照样能跑。
+     */
+    private String resolveOpenId(String code) {
+        boolean configured = wxAppid != null && !wxAppid.trim().isEmpty()
+                && wxSecret != null && !wxSecret.trim().isEmpty();
+        if (!configured) {
+            return "demo_openid_" + (code == null || code.isEmpty() ? "default" : code);
+        }
+        String openid = WxUtil.getOpenId(wxAppid.trim(), wxSecret.trim(), code);
+        if (openid == null || openid.isEmpty()) {
+            throw new IllegalArgumentException("微信登录失败：code 可能已失效，退出小程序重进一次");
+        }
+        return openid;
+    }
+
+    /** 白名单里的 openid 登录即管理员。配在 wx.admin-open-ids，逗号分隔 */
+    private boolean isWhitelistedAdmin(String openid) {
+        if (openid == null || adminOpenIds == null || adminOpenIds.trim().isEmpty()) {
+            return false;
+        }
+        for (String item : adminOpenIds.split(",")) {
+            if (openid.equals(item.trim())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /** 免注册建号：只用 openid + 昵称，不设密码 */
-    private User registerByOpenid(String openid, String nickName) {
-        User user = new User();
+    private User registerByOpenid(String openid, String nickName) {        User user = new User();
         user.setUserUuid(UUID.randomUUID().toString());
         user.setUserName("wx_" + openid);
         user.setRealName(nickName == null || nickName.isEmpty() ? "微信用户" : nickName);
@@ -166,6 +217,30 @@ public class WxShopController {
     public RestResponse<List<UserCoupon>> couponMine(@RequestBody Map<String, Object> body) {
         Integer userId = requireUserId(body);
         return RestResponse.ok(couponService.mine(userId, intOf(body, "status")));
+    }
+
+    /**
+     * 好友通过分享卡片进来领券：被分享者得一张，分享者也补一张。
+     * sharerId 由分享卡片路径上的 shareFrom 带进来，同一对好友只发一次。
+     */
+    @PostMapping("/coupon/share/receive")
+    public RestResponse<Map<String, Object>> couponShareReceive(@RequestBody Map<String, Object> body) {
+        Integer userId = requireUserId(body);
+        Integer sharerId = intOf(body, "sharerId");
+        if (sharerId == null) {
+            throw new IllegalArgumentException("缺少 sharerId");
+        }
+        return RestResponse.ok(couponService.receiveByShare(userId, sharerId));
+    }
+
+    /**
+     * 分享动作本身的奖励：点「分享得券」把小程序发出去时调，给自己发一张分享奖励券。
+     * 每人限 1 张，已领过返回 null（不报错，免得打断分享流程）。
+     */
+    @PostMapping("/coupon/share/reward")
+    public RestResponse<Coupon> couponShareReward(@RequestBody Map<String, Object> body) {
+        Integer userId = requireUserId(body);
+        return RestResponse.ok(couponService.claimShareReward(userId));
     }
 
     // ------------------------------------------------------------------

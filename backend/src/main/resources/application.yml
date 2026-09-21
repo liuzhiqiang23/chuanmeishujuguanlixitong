@@ -48,8 +48,14 @@ system:
     publicKey: ${PWD_KEY_PUBLIC_KEY:}
     privateKey: ${PWD_KEY_PRIVATE_KEY:}
   wx:
-    appid: 
-    secret: 
+    # 下面两个还是模板作者自带的凭证。换成自己的小程序 appid/secret 后，
+    # 登录就会自动走微信官方 code2session（openid 才稳定）；不换则退回演示模式。
+    # 建议用环境变量注入，别把 secret 提交进 git：WX_APPID / WX_SECRET
+    appid: ${WX_APPID:}
+    secret: ${WX_SECRET:}
+    # 管理员白名单（微信 openid，逗号分隔）。这几个号登录后自动是管理员，
+    # 前端据此显示删片按钮，后端也会再校验一次 role。环境变量：WX_ADMIN_OPEN_IDS
+    admin-open-ids: ${WX_ADMIN_OPEN_IDS:}
     token-to-live: 12h   #token 过期时间
     security-ignore-urls:
       - /api/wx/student/auth/bind
@@ -61,6 +67,10 @@ system:
       - /api/wx/member/**
       - /api/wx/coupon/**
       - /api/wx/order/**
+      # 分类导航和搜索是公开数据；admin/video/delete 在 controller 里自己校验 role == 3
+      - /api/wx/category/**
+      - /api/wx/search/**
+      - /api/wx/admin/**
 
 
 

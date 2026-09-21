@@ -45,3 +45,9 @@ backend/src/main/resources/static/posters/
 .claude/
 data/_git_need_add.txt
 data/_git_orphans.txt
+
+# ---------- 换数据集作业新增（2026-09-20） ----------
+# Kaggle 原始下载件：credits.csv 190MB 超 GitHub 100MB 硬限制，且可随时重新下载
+data/new_source/
+# 内网穿透二进制（52MB），可从官网重新下载
+tools/cloudflared.exe

@@ -34,7 +34,15 @@ function post(path, data, opt) {
       body.userId = uid;
     }
   }
-  return new Promise((resolve, reject) => {
+  // 等 app 探测出可用的后端地址再发，否则冷启动时的第一条请求会打到还没确定的地址上。
+  // 但最多只等 1.5 秒：某条候选连不通时（真机上的 127.0.0.1、域名还没解析时），
+  // TCP 会一直挂到超时才失败，不能让整页请求陪着它一起卡住。超时就先用当前地址发。
+  const ready = (app && app.ready) ? app.ready() : Promise.resolve();
+  const bounded = Promise.race([
+    ready,
+    new Promise((resolve) => setTimeout(resolve, 1500))
+  ]);
+  return bounded.then(() => new Promise((resolve, reject) => {
     wx.request({
       url: baseUrl() + path,
       method: 'POST',
@@ -53,12 +61,21 @@ function post(path, data, opt) {
       },
       fail(err) {
         if (!options.silent) {
-          wx.showToast({ title: '连不上后端，检查是否已启动', icon: 'none' });
+          // 真机上没地方看 console，把「请求到哪个地址」「微信给的原始错误」
+          // 「三条候选各自的探测结果」一次弹出来 —— 排查连不上时这几条就够了。
+          const diag = (app && app.globalData && app.globalData.probeDiag) || '(探测还没结束)';
+          wx.showModal({
+            title: '连不上后端',
+            content: '请求地址：\n' + baseUrl() + path +
+                     '\n\n微信错误：\n' + ((err && err.errMsg) || String(err)) +
+                     '\n\n候选地址探测：\n' + diag,
+            showCancel: false
+          });
         }
         reject(err);
       }
     });
-  });
+  }));
 }
 
 /** 格式化时间：后端返回的是 ISO 字符串，截成 年-月-日 或 年-月-日 时:分 */
@@ -104,4 +121,76 @@ function couponStatusText(status) {
   return '';
 }
 
-module.exports = { post, fmtTime, fmtMoney, orderStatusText, couponStatusText, baseUrl };
+/** 海报的网络地址。真机上不能直接给 <image> 用，要先过 cachePosters */
+function posterUrl(videoId) {
+  return baseUrl() + '/posters/' + videoId + '.jpg?v=2';
+}
+
+/** 和后台 OrderServiceImpl.videoPrice 保持一致：>=8.5 → 12 元，>=7.5 → 9 元，其余 6 元 */
+function videoPrice(vote) {
+  const v = Number(vote || 0);
+  if (v >= 8.5) {
+    return '12.00';
+  }
+  if (v >= 7.5) {
+    return '9.00';
+  }
+  return '6.00';
+}
+
+/**
+ * 把列表里的网络海报下到本地临时文件，再替换列表项的 posterSrc。
+ *
+ * 真机上 <image> 直接引 http 图片会被小程序拦掉（接口能通、图片一张都不出），
+ * 而本地文件不受域名限制。wx.downloadFile 受「不校验合法域名」开关保护，预览版可用。
+ * 微信限制 downloadFile 并发 10 个，这里用 6 个并发的小队列。
+ *
+ * @param {object} page   页面实例（用它的 data / setData）
+ * @param {string} key    列表在 data 里的字段名，如 'videos'
+ * @param {number} offset 从第几项开始
+ * @param {number} count  处理多少项
+ */
+function cachePosters(page, key, offset, count) {
+  let i = 0;
+  const CONCURRENCY = 6;
+  const next = () => {
+    if (i >= count) {
+      return;
+    }
+    const idx = offset + i;
+    i++;
+    const list = page.data[key] || [];
+    const item = list[idx];
+    if (!item || !item.posterSrc || item.posterSrc.indexOf('http') !== 0) {
+      next();
+      return;
+    }
+    wx.downloadFile({
+      url: item.posterSrc,
+      success: (r) => {
+        if (r.statusCode === 200 && r.tempFilePath) {
+          const patch = {};
+          patch[key + '[' + idx + '].posterSrc'] = r.tempFilePath;
+          page.setData(patch);
+        }
+      },
+      fail: () => {},
+      complete: () => next()
+    });
+  };
+  for (let k = 0; k < CONCURRENCY; k++) {
+    next();
+  }
+}
+
+module.exports = {
+  post,
+  fmtTime,
+  fmtMoney,
+  orderStatusText,
+  couponStatusText,
+  baseUrl,
+  posterUrl,
+  videoPrice,
+  cachePosters
+};

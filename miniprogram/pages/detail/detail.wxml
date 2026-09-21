@@ -1,7 +1,7 @@
 <!-- 影片详情 -->
 <view class="page" wx:if="{{detail}}">
   <view class="head">
-    <image class="head-poster" src="{{base}}/posters/{{videoId}}.jpg" mode="aspectFill"></image>
+    <image class="head-poster" src="{{posterSrc}}" mode="aspectFill" bindtap="previewPoster"></image>
     <view class="head-info">
       <view class="head-name">{{detail.videoName}}</view>
       <view class="muted">{{detail.originalTitle}}</view>

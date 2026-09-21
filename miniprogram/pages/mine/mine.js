@@ -9,17 +9,27 @@ Page({
     coupons: [],
     orders: [],
     couponFilter: -1,   // -1 全部，0 未使用，1 已使用，2 已过期
-    tab: 'order'        // order | coupon
+    tab: 'order',       // order | coupon
+    isAdmin: false
   },
 
   onShow() {
     const app = getApp();
     this.setData({
-      userId: (app.globalData && app.globalData.userId) || wx.getStorageSync('userId') || null
+      userId: (app.globalData && app.globalData.userId) || wx.getStorageSync('userId') || null,
+      isAdmin: (app.globalData && app.globalData.isAdmin) === true
     });
     this.loadMember();
     this.loadCoupons();
     this.loadOrders();
+  },
+
+  /**
+   * 管理员身份由后端白名单（wx.open-ids 那条配置）授予，登录时自动生效，
+   * 这里只读全局标记来决定显不显示入口。
+   */
+  activateAdmin() {
+    wx.showToast({ title: '管理员由后台配置，无需操作', icon: 'none' });
   },
 
   loadMember() {

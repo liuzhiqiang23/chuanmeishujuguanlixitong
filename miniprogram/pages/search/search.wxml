@@ -1,0 +1,55 @@
+<!-- 搜索：搜索框 + 历史标签云 + 结果列表 -->
+<view class="page">
+  <view class="search-bar">
+    <input class="search-input"
+           placeholder="搜片名，如 蜘蛛侠"
+           value="{{keyword}}"
+           confirm-type="search"
+           bindinput="onInput"
+           bindconfirm="onSearch" />
+    <view class="search-btn" bindtap="onSearch">搜索</view>
+  </view>
+
+  <view class="card" wx:if="{{!searched && history.length > 0}}">
+    <view class="row-between">
+      <text class="title">历史搜索</text>
+      <text class="muted" bindtap="clearHistory">清空</text>
+    </view>
+    <view class="history-wrap">
+      <view class="history-tag" wx:for="{{history}}" wx:key="*this"
+            data-kw="{{item}}" bindtap="onTagTap">{{item}}</view>
+    </view>
+  </view>
+
+  <view class="card" wx:if="{{searched}}">
+    <view class="row-between">
+      <text class="title">搜索结果</text>
+      <text class="muted">共 {{total}} 部</text>
+    </view>
+    <view class="divider"></view>
+    <view class="video-item" wx:for="{{videos}}" wx:key="videoId"
+          data-id="{{item.videoId}}" bindtap="goDetail">
+      <image class="poster" src="{{item.posterSrc}}" mode="aspectFill" lazy-load
+             data-src="{{item.posterSrc}}" catchtap="previewPoster"></image>
+      <view class="video-info">
+        <view class="video-name">{{item.videoName}}</view>
+        <view class="muted">评分 {{item.voteAverage}} · 热度 {{item.popularity}}</view>
+        <view class="row" style="margin-top:12rpx">
+          <text class="tag">观影券</text>
+          <text class="price">¥{{item.price}}</text>
+          <text wx:if="{{isAdmin}}" class="del-btn"
+                data-id="{{item.videoId}}" data-name="{{item.videoName}}"
+                catchtap="removeVideo">删除</text>
+          <text class="chevron">›</text>
+        </view>
+      </view>
+    </view>
+    <view class="empty" wx:if="{{videos.length === 0}}">{{loading ? '搜索中...' : '没搜到，换个关键词试试'}}</view>
+  </view>
+
+  <view class="card" wx:if="{{!searched && history.length === 0}}">
+    <view class="empty">输入片名开始搜索</view>
+  </view>
+
+  <view style="height:40rpx"></view>
+</view>
