@@ -1,0 +1,66 @@
+{
+  "task": "boxoffice_log_revenue_regression",
+  "seed": 42,
+  "n_train": 4000,
+  "n_val": 1000,
+  "n_features": 34,
+  "best": "RandomForest 随机森林",
+  "algorithms": [
+    {
+      "name": "LinearRegression 线性回归",
+      "rmse": 0.9243,
+      "mae": 0.5976,
+      "r2": 0.5436,
+      "fit_seconds": 0.17
+    },
+    {
+      "name": "DecisionTree 决策树",
+      "rmse": 1.1323,
+      "mae": 0.6953,
+      "r2": 0.3151,
+      "fit_seconds": 0.03
+    },
+    {
+      "name": "RandomForest 随机森林",
+      "rmse": 0.875,
+      "mae": 0.5546,
+      "r2": 0.591,
+      "fit_seconds": 0.78
+    },
+    {
+      "name": "GradientBoosting 梯度提升",
+      "rmse": 0.884,
+      "mae": 0.5592,
+      "r2": 0.5826,
+      "fit_seconds": 1.25
+    },
+    {
+      "name": "KNN K近邻(k=15)",
+      "rmse": 1.0377,
+      "mae": 0.6856,
+      "r2": 0.4248,
+      "fit_seconds": 0.0
+    },
+    {
+      "name": "SVR 支持向量回归(RBF)",
+      "rmse": 0.9349,
+      "mae": 0.6033,
+      "r2": 0.5331,
+      "fit_seconds": 1.25
+    },
+    {
+      "name": "MLP 多层感知机(深度学习)",
+      "rmse": 0.9289,
+      "mae": 0.6304,
+      "r2": 0.5391,
+      "fit_seconds": 2.08
+    },
+    {
+      "name": "LightGBM",
+      "rmse": 0.8761,
+      "mae": 0.5596,
+      "r2": 0.5899,
+      "fit_seconds": 0.19
+    }
+  ]
+}
