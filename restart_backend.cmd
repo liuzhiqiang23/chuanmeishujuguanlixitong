@@ -17,6 +17,9 @@ setlocal
 
 cd /d "%~dp0"
 
+rem Load local secrets (DB password, PWD_KEY_* RSA pair) if present.
+if exist "%~dp0local_env.cmd" call "%~dp0local_env.cmd"
+
 echo ============================================================
 echo  movie-system backend restart
 echo  project dir: %CD%
@@ -43,7 +46,9 @@ if defined PID (
 
 echo.
 echo [2/4] Starting backend in background (log: _boot.log, JVM heap capped at 512m) ...
-start "" /MIN cmd /c "cd /d backend && mvn -q -Dmaven.test.skip=true compile spring-boot:run -Dspring-boot.run.jvmArguments=-Xmx512m 1> ..\_boot.log 2>&1"
+rem application-dev.yml reads the DB password from env (sanitized repo); set it here.
+set "DB_PASSWORD=123456"
+start "" /MIN cmd /c "cd /d backend && set DB_PASSWORD=123456&& mvn -q -Dmaven.test.skip=true compile spring-boot:run -Dspring-boot.run.jvmArguments=-Xmx512m 1> ..\_boot.log 2>&1"
 
 echo.
 echo [3/4] Waiting for port 8000 (max ~180s) ...
@@ -72,7 +77,7 @@ powershell -NoProfile -Command "try { $x = Invoke-RestMethod -Uri 'http://127.0.
 
 echo.
 echo ------------------------------------------------------------
-echo  Done. Open http://localhost:8000/admin   (admin / 123456)
+echo  Done. Open http://localhost:8000/admin  (login account: see lab report / DB t_user)
 echo  Log file: _boot.log
 echo ------------------------------------------------------------
 
