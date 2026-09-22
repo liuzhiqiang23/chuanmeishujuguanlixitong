@@ -54,3 +54,6 @@ tools/cloudflared.exe
 
 # 模型二进制文件可由 train_all.py 一键重训生成，不入库
 algorithm/boxoffice_prediction/models/
+
+# 本机私有环境变量（密钥/密码），永不入库
+local_env.cmd
