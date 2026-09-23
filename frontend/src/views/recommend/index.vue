@@ -79,7 +79,7 @@
     </div>
 
     <div v-if="!loading && !items.length" class="empty-tip">
-      选择参考影片或类型后点击「生成推荐」（后端推荐接口于第六步接入）
+      选择参考影片或类型后点击「生成推荐」：相似影片来自新数据集的内容相似度计算，类型热门按热度与评分人数排序。
     </div>
   </div>
 </template>
@@ -122,11 +122,21 @@ export default {
       this.similar.movieId = Number(mid)
       this.activeTab = 'similar'
       this.searchMovies('')
+      this.loadSeedOption(mid)
       this.runSimilar()
     }
   },
   methods: {
     posterUrl,
+    /** 种子影片不一定在"热度前 20"里，单独查一次详情，让下拉框显示片名而不是 id */
+    loadSeedOption (id) {
+      movieApi.detail(id).then(re => {
+        const m = re.response
+        if (m && !this.movieOptions.some(o => o.id === m.id)) {
+          this.movieOptions.unshift({ id: m.id, title: m.title, year: m.year })
+        }
+      }).catch(() => {})
+    },
     onTab () {
       this.items = []
     },

@@ -158,21 +158,21 @@ def main():
             _int(r["budget"]), _int(r["revenue"]),
             _num(r["log_budget"], float), _num(r["log_revenue"], float),
             _num(r["popularity"], float), _num(r["vote_average"], float), _int(r["vote_count"]),
-            _str(r["original_language"], 16), _str(r["status"], 32), _str(r["homepage"], 500),
+            _str(r["original_language"], 16), _str(r["main_genre"], 64), _str(r["status"], 32), _str(r["homepage"], 500),
             _str(r["poster_path"], 255), 1 if _int(r["is_collection"]) else 0,
         ))
     sql_movie = """
         INSERT INTO t_movie (id, video_name, original_title, overview, tagline, release_date, year, month,
                              runtime, budget, revenue, log_budget, log_revenue, popularity, vote_average,
-                             vote_count, original_language, status, homepage, poster_path, is_collection)
-        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                             vote_count, original_language, main_genre, status, homepage, poster_path, is_collection)
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
         ON DUPLICATE KEY UPDATE video_name=VALUES(video_name), original_title=VALUES(original_title),
             overview=VALUES(overview), tagline=VALUES(tagline), release_date=VALUES(release_date),
             year=VALUES(year), month=VALUES(month), runtime=VALUES(runtime), budget=VALUES(budget),
             revenue=VALUES(revenue), log_budget=VALUES(log_budget), log_revenue=VALUES(log_revenue),
             popularity=VALUES(popularity), vote_average=VALUES(vote_average), vote_count=VALUES(vote_count),
-            original_language=VALUES(original_language), status=VALUES(status), homepage=VALUES(homepage),
-            poster_path=VALUES(poster_path), is_collection=VALUES(is_collection)
+            original_language=VALUES(original_language), main_genre=VALUES(main_genre), status=VALUES(status),
+            homepage=VALUES(homepage), poster_path=VALUES(poster_path), is_collection=VALUES(is_collection)
     """
     for i in range(0, len(movie_rows), BATCH):
         cur.executemany(sql_movie, movie_rows[i:i + BATCH])

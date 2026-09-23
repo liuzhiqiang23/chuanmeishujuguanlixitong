@@ -1,7 +1,10 @@
 package com.alvis.media.service;
-import com.alvis.media.viewmodel.recommend.RecommendItemVM;
+
 import com.alvis.media.viewmodel.recommend.RecommendRequestVM;
-import java.util.List;
+import com.alvis.media.viewmodel.recommend.RecommendResultVM;
+
+/** 智能推荐：基于新数据集的内容相似 / 类型热门 / 站内评分加权 */
 public interface RecommendService {
-    List<RecommendItemVM> recommend(RecommendRequestVM req);
+
+    RecommendResultVM recommend(RecommendRequestVM req);
 }

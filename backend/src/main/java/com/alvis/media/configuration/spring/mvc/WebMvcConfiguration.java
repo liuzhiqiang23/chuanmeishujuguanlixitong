@@ -33,6 +33,13 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
     @Value("${system.eda.dir:}")
     private String edaDir;
 
+    /**
+     * 票房预测的算法对比图目录（algorithm/boxoffice_prediction/figures），
+     * 通过 /algo-figures/** 暴露给前端「算法对比」页面。
+     */
+    @Value("${system.algo.dir:}")
+    private String algoDir;
+
     public WebMvcConfiguration(TokenHandlerInterceptor tokenHandlerInterceptor,
                                SystemConfig systemConfig) {
         this.tokenHandlerInterceptor = tokenHandlerInterceptor;
@@ -57,6 +64,13 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
         } else {
             registry.addResourceHandler("/eda/**")
                     .addResourceLocations(edaClasspath)
+                    .setCacheControl(CacheControl.maxAge(Duration.ofMinutes(10)).cachePublic());
+        }
+
+        // 算法对比图：algorithm/boxoffice_prediction/figures → /algo-figures/**
+        if (StringUtils.hasText(algoDir) && Files.exists(Paths.get(algoDir))) {
+            registry.addResourceHandler("/algo-figures/**")
+                    .addResourceLocations(Paths.get(algoDir).toUri().toString())
                     .setCacheControl(CacheControl.maxAge(Duration.ofMinutes(10)).cachePublic());
         }
 
