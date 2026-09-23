@@ -1,20 +1,28 @@
+/* 我的页：青紫渐变横幅 + 霓虹页签 */
 .user-bar {
   margin: 20rpx 24rpx;
   padding: 34rpx 28rpx;
-  border-radius: 16rpx;
-  background: linear-gradient(135deg, #2F7FD1, #4E9BE8);
-  color: #FFFFFF;
+  border-radius: 18rpx;
+  background:
+    radial-gradient(120% 160% at 15% 0%, rgba(0, 229, 255, 0.28), transparent 55%),
+    linear-gradient(135deg, rgba(10, 14, 40, 0.9), rgba(30, 22, 84, 0.9));
+  border: 1rpx solid rgba(0, 229, 255, 0.35);
+  box-shadow: 0 0 30rpx rgba(0, 229, 255, 0.18), 0 10rpx 30rpx rgba(0, 0, 0, 0.45);
+  color: #EAF6FF;
 }
 
 .user-name {
   font-size: 36rpx;
   font-weight: 600;
   margin-bottom: 10rpx;
+  letter-spacing: 2rpx;
+  text-shadow: 0 0 14rpx rgba(0, 229, 255, 0.55);
 }
 
 .bar-btn {
-  background: rgba(255, 255, 255, 0.22);
-  color: #FFFFFF;
+  background: rgba(0, 229, 255, 0.12);
+  border: 1rpx solid rgba(0, 229, 255, 0.45);
+  color: #00E5FF;
   font-size: 24rpx;
   padding: 10rpx 24rpx;
   border-radius: 40rpx;
@@ -24,28 +32,32 @@
   flex: 1;
   text-align: center;
   padding: 18rpx 0;
-  color: #8A8F99;
+  color: #7C89B8;
   font-size: 30rpx;
 }
 
 .tab-active {
-  color: #2F7FD1;
+  color: #00E5FF;
   font-weight: 600;
-  border-bottom: 4rpx solid #2F7FD1;
+  border-bottom: 4rpx solid #00E5FF;
+  text-shadow: 0 0 14rpx rgba(0, 229, 255, 0.6);
 }
 
 .chip {
   padding: 10rpx 28rpx;
   border-radius: 40rpx;
-  background: #F2F4F7;
-  color: #666666;
+  background: rgba(0, 229, 255, 0.07);
+  border: 1rpx solid rgba(0, 229, 255, 0.22);
+  color: #9FB6E8;
   font-size: 26rpx;
   margin-right: 16rpx;
 }
 
 .chip-active {
-  background: #2F7FD1;
-  color: #FFFFFF;
+  background: linear-gradient(135deg, #00E5FF, #7B5CFF);
+  color: #06091A;
+  font-weight: 600;
+  box-shadow: 0 0 18rpx rgba(0, 229, 255, 0.4);
 }
 
 .cancel-btn {

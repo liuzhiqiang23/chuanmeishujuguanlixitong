@@ -1,16 +1,42 @@
-/* 全局样式：和 movie-system 后台的蓝色主色调保持一致 */
+/* ============================================================
+   全局主题：深空科幻风（Deep-Space Sci-Fi HUD）
+   主霓虹  #00E5FF（青）   辅霓虹  #7B5CFF（紫）
+   警示/价格 #FF4D6D（霓虹粉）
+   面板    玻璃质感 rgba(18,28,62,0.72) + 霓虹描边
+   ============================================================ */
 page {
-  background: #F5F6F8;
+  /* 深空底：网格线 + 顶部星云渐变 */
+  background:
+    repeating-linear-gradient(0deg, rgba(0, 229, 255, 0.03) 0, rgba(0, 229, 255, 0.03) 2rpx, transparent 2rpx, transparent 140rpx),
+    repeating-linear-gradient(90deg, rgba(0, 229, 255, 0.03) 0, rgba(0, 229, 255, 0.03) 2rpx, transparent 2rpx, transparent 140rpx),
+    linear-gradient(180deg, #0B1230 0%, #070B18 100%);
   font-size: 28rpx;
-  color: #222222;
+  color: #E8F1FF;
 }
 
+/* ---- 玻璃卡片：全局通用 ---- */
 .card {
-  background: #FFFFFF;
-  border-radius: 16rpx;
+  position: relative;
+  background: rgba(18, 28, 62, 0.72);
+  border: 1rpx solid rgba(0, 229, 255, 0.22);
+  border-radius: 18rpx;
   padding: 24rpx;
   margin: 20rpx 24rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+  box-shadow:
+    0 0 24rpx rgba(0, 229, 255, 0.08),
+    0 10rpx 32rpx rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+
+/* 卡片顶部一条霓虹光线 */
+.card::before {
+  content: "";
+  position: absolute;
+  left: 24rpx;
+  right: 24rpx;
+  top: 0;
+  height: 2rpx;
+  background: linear-gradient(90deg, transparent, rgba(0, 229, 255, 0.85), rgba(123, 92, 255, 0.85), transparent);
 }
 
 .row {
@@ -24,135 +50,40 @@ page {
   justify-content: space-between;
 }
 
+/* ---- 标题：发光字 ---- */
 .title {
   font-size: 32rpx;
   font-weight: 600;
+  color: #F2F8FF;
+  letter-spacing: 2rpx;
+  text-shadow: 0 0 16rpx rgba(0, 229, 255, 0.45);
 }
 
 .muted {
-  color: #8A8F99;
+  color: #7C89B8;
   font-size: 24rpx;
 }
 
+/* ---- 价格：霓虹粉 ---- */
 .price {
-  color: #E64545;
+  color: #FF4D6D;
   font-weight: 600;
+  text-shadow: 0 0 14rpx rgba(255, 77, 109, 0.45);
 }
 
-.btn-primary {
-  background: #2F7FD1;
-  color: #FFFFFF;
-  border-radius: 44rpx;
-  font-size: 30rpx;
-  line-height: 84rpx;
-  height: 84rpx;
+/* ---- 通用霓虹按钮（供页面复用） ---- */
+.btn-neon {
+  background: linear-gradient(135deg, #00E5FF, #7B5CFF);
+  color: #06091A;
+  font-weight: 600;
+  border-radius: 40rpx;
+  box-shadow: 0 0 24rpx rgba(0, 229, 255, 0.35);
 }
 
-.btn-primary[disabled] {
-  background: #B9CDE3;
-  color: #FFFFFF;
-}
-
+/* 深色描边按钮 */
 .btn-ghost {
-  background: #FFFFFF;
-  color: #2F7FD1;
-  border: 2rpx solid #2F7FD1;
-  border-radius: 44rpx;
-  font-size: 28rpx;
-}
-
-.tag {
-  display: inline-block;
-  padding: 2rpx 12rpx;
-  border-radius: 6rpx;
-  background: #EEF4FB;
-  color: #2F7FD1;
-  font-size: 22rpx;
-  margin-right: 10rpx;
-}
-
-.tag-red {
-  background: #FDECEC;
-  color: #E64545;
-}
-
-.poster {
-  width: 140rpx;
-  height: 200rpx;
-  border-radius: 10rpx;
-  background: #EDEDED;
-}
-
-.divider {
-  height: 2rpx;
-  background: #EEEEEE;
-  margin: 20rpx 0;
-}
-
-.empty {
-  text-align: center;
-  color: #AAAAAA;
-  font-size: 26rpx;
-  padding: 60rpx 0;
-}
-
-.footer-bar {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: #FFFFFF;
-  padding: 16rpx 24rpx calc(16rpx + env(safe-area-inset-bottom));
-  box-shadow: 0 -2rpx 12rpx rgba(0, 0, 0, 0.05);
-}
-
-/* 列表项右侧箭头：暗示整行可点进详情 */
-.chevron {
-  margin-left: auto;
-  padding-left: 16rpx;
-  color: #C8CDD4;
-  font-size: 42rpx;
-  line-height: 1;
-}
-
-/* ---------- 影片列表项：三个页面（首页/分类/搜索）共用，必须放全局 ----------
-   教训：页面级 wxss 不共享，写进 index.wxss 的话分类页和搜索页拿不到样式，
-   flex 布局会失效、退化成块级堆叠，海报占满整行、右边留一大片空白。 */
-.video-item {
-  display: flex;
-  padding: 20rpx 0;
-  border-bottom: 2rpx solid #F2F2F2;
-}
-
-.video-item:last-child {
-  border-bottom: none;
-}
-
-.video-info {
-  flex: 1;
-  min-width: 0;
-  margin-left: 20rpx;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.video-name {
-  font-size: 30rpx;
-  font-weight: 600;
-  margin-bottom: 8rpx;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* 管理员的删除按钮：靠右对齐，跟价格拉开距离，别和箭头糊在一起 */
-.del-btn {
-  margin-left: auto;
-  padding: 4rpx 22rpx;
-  border: 1rpx solid #E55A5A;
-  border-radius: 26rpx;
-  color: #E55A5A;
-  font-size: 24rpx;
-  line-height: 1.6;
+  background: rgba(0, 229, 255, 0.08);
+  border: 1rpx solid rgba(0, 229, 255, 0.45);
+  color: #00E5FF;
+  border-radius: 40rpx;
 }

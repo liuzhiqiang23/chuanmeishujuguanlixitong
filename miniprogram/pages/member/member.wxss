@@ -1,14 +1,21 @@
+/* 会员页：深紫星云 + 金色霓虹 */
 .member-bar {
   margin: 20rpx 24rpx;
   padding: 34rpx 28rpx;
-  border-radius: 16rpx;
-  background: linear-gradient(135deg, #2E3A4D, #4A5B73);
+  border-radius: 18rpx;
+  background:
+    radial-gradient(120% 160% at 85% 0%, rgba(123, 92, 255, 0.35), transparent 55%),
+    linear-gradient(135deg, rgba(10, 14, 40, 0.9), rgba(42, 27, 94, 0.9));
+  border: 1rpx solid rgba(246, 227, 180, 0.4);
+  box-shadow: 0 0 30rpx rgba(123, 92, 255, 0.25), 0 10rpx 30rpx rgba(0, 0, 0, 0.45);
   color: #F6E3B4;
 }
 
 .member-title {
   font-size: 36rpx;
   font-weight: 600;
+  letter-spacing: 2rpx;
+  text-shadow: 0 0 16rpx rgba(246, 227, 180, 0.55);
 }
 
 .member-sub {
@@ -22,14 +29,16 @@
   align-items: center;
   justify-content: space-between;
   padding: 24rpx;
-  border: 2rpx solid #E8E8E8;
-  border-radius: 12rpx;
+  border: 1rpx solid rgba(0, 229, 255, 0.2);
+  background: rgba(0, 229, 255, 0.04);
+  border-radius: 14rpx;
   margin-bottom: 16rpx;
 }
 
 .plan-active {
-  border-color: #2F7FD1;
-  background: #F5F9FF;
+  border-color: rgba(0, 229, 255, 0.8);
+  background: rgba(0, 229, 255, 0.1);
+  box-shadow: 0 0 22rpx rgba(0, 229, 255, 0.3);
 }
 
 .plan-name {
@@ -46,7 +55,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 22rpx 0;
-  border-bottom: 2rpx solid #F2F2F2;
+  border-bottom: 1rpx solid rgba(0, 229, 255, 0.14);
 }
 
 .coupon-row:last-child {
@@ -54,8 +63,9 @@
 }
 
 .radio {
-  color: #2F7FD1;
+  color: #00E5FF;
   font-size: 34rpx;
+  text-shadow: 0 0 12rpx rgba(0, 229, 255, 0.55);
 }
 
 .pay-btn {

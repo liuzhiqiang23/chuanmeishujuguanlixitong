@@ -14,7 +14,14 @@ Page({
     isAdmin: false
   },
 
-  onLoad() {
+  onLoad(options) {
+    // 首页分类宫格带 tagId 进来：加载完分类后直接选中该分类
+    if (options && options.tagId) {
+      this._pendingTag = {
+        id: Number(options.tagId),
+        name: decodeURIComponent(options.tagName || '')
+      };
+    }
     this.loadCategories();
   },
 
@@ -30,7 +37,17 @@ Page({
       const cats = list || [];
       this.setData({ categories: cats });
       if (cats.length > 0) {
-        this.pick(cats[0].tagId, cats[0].tagName);
+        const p = this._pendingTag;
+        this._pendingTag = null;
+        const hit = p && cats.find((c) => c.tagId === p.id);
+        if (hit) {
+          this.pick(hit.tagId, hit.tagName);
+        } else if (p && p.id) {
+          // 带的分类不在前 24 里也照选：列表页照常能拉到该分类的影片
+          this.pick(p.id, p.name || '');
+        } else {
+          this.pick(cats[0].tagId, cats[0].tagName);
+        }
       } else {
         this.setData({ loading: false, status: '暂无分类' });
       }
