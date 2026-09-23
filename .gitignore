@@ -53,7 +53,8 @@ data/new_source/
 tools/cloudflared.exe
 
 # 模型二进制文件可由 train_all.py 一键重训生成，不入库
-algorithm/boxoffice_prediction/models/
+# （用 models/* 而不是 models/：目录整体被排除时无法再放行其中单个文件）
+algorithm/boxoffice_prediction/models/*
 # 例外：推理元数据很小（2KB）且是在线预测的必需件，入库保证仓库自包含
 !algorithm/boxoffice_prediction/models/feature_meta.json
 
