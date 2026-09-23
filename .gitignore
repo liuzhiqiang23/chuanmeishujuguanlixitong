@@ -67,3 +67,6 @@ sql/backup/*.sql
 
 # 本机私有环境变量（密钥/密码），永不入库
 local_env.cmd
+
+# 一致性校验脚本的逐行中间产物（可重跑生成）
+tools/_consistency.jsonl
