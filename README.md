@@ -13,23 +13,20 @@
 movie-system/                          # 系统根目录（整个目录拷贝到任何机器即可部署，零外部依赖）
 ├── .venv/                             # Python 3.12 虚拟环境（算法依赖已装好；不可用时可运行 setup_venv.cmd 重建）
 ├── data/                              # 统一数据集目录（工程唯一数据根，各算法模块共享）
-│   ├── train.csv                      # 票房预测原始数据（含票房标签，3000 部）
-│   ├── test.csv                       # 票房预测原始数据（待预测，4398 部）
-│   ├── sample_submission.csv          # Kaggle 提交样例
-│   ├── processed/                     # 清洗与特征工程产物（preprocess.py 生成）
-│   ├── prediction/                    # 预测/EDA 增强数据（上映国家表、附加特征表）
-│   └── recommendation/                # 推荐数据：TMDB 元数据 + MovieLens 评分
-│       ├── tmdb_5000_movies.csv
-│       ├── tmdb_5000_credits.csv
-│       └── personal/                  # MovieLens 个人化数据（movies/ratings/links + 划分 train/test）
+│   ├── train.csv                      # 票房预测训练数据（含票房标签，5000 部）
+│   ├── test.csv                       # 票房预测测试数据（待预测，5000 部，无票房列）
+│   ├── new_source/                    # Kaggle The Movies Dataset 原始下载件（不入库，可删）
+│   ├── make_new_dataset.py            # 数据集抽样脚本：三表合并去重 → 固定种子 42 抽 5000+5000
+│   └── processed/                     # 清洗与特征工程产物（preprocess.py 生成）
 ├── doc/                               # 文档
 ├── algorithm/                         # Python 算法引擎（不含数据，统一从 data/ 读取）
 │   ├── FeatureEDA/                    #   需求一：数据分析与特征可视化
 │   │   ├── preprocess.py              #     数据清洗与特征工程（共享流水线）
 │   │   ├── eda.py                     #     EDA 唯一图脚本：一次生成 21 张图（fig01~fig14 + 7 张网页图）
 │   │   └── figures/                   #     EDA 输出图（后端 /eda/** 挂载，无需 Python 在线）
-│   ├── prediction/                    #   需求二：电影票房预测（predict_api.py + model_cache 模型缓存）
-│   └── recommendation/                #   需求三：电影推荐（recommend_api.py + 各推荐子模块）
+│   └── boxoffice_prediction/          #   需求二：电影票房预测
+│       ├── train_all.py               #     8 种算法一键对比训练（metrics.json + 对比图 + 最佳模型）
+│       └── metrics.json               #     各算法评估指标（RMSE / MAE / R²）
 ├── sql/                               # 数据库建库 / 修复 / 数据导入脚本
 ├── backend/                           # Spring Boot 后端（内嵌编译好的前端页面，端口 8000）
 ├── frontend/                          # Vue 前端源码（构建产物位于 backend/src/main/resources/static/admin）
@@ -42,8 +39,7 @@ movie-system/                          # 系统根目录（整个目录拷贝到
 - 工程内**只有 `data/` 一个数据根**，任何算法模块下都不再自带 `data` 目录（历史重复副本已清理）；
 - 算法脚本统一用「自身文件位置」推导系统根目录后再拼接数据路径（`SYSTEM_ROOT/data/...`），
   不依赖当前工作目录，因此在任意目录下执行脚本都能正确读到数据；
-- 目录划分：`data/` 放票房预测原始集与共享清洗产物 `processed/`，`data/prediction/` 放预测与 EDA 的增强数据，
-  `data/recommendation/` 放推荐所需的 TMDB 元数据与 MovieLens 评分（含随机划分出的 `personal/train|test.csv`）。
+- 目录划分：`data/` 放票房预测数据集、抽样脚本与共享清洗产物 `processed/`；旧版 TMDB/MovieLens 数据目录已于换数据集作业中清理。
 
 
 #### 部署教程（整个目录拷贝到新机器即可，零外部代码依赖）
@@ -70,18 +66,13 @@ movie-system/                          # 系统根目录（整个目录拷贝到
    ```bash
    mysql -uroot -p123456 < sql/vidio_mangage_db.sql
    ```
-4. （可选）把 TMDB / MovieLens 数据导入业务库：
-   ```bash
-   .venv\Scripts\python.exe sql/import_data.py
-   ```
-   > 数据源在统一目录 `data/recommendation`（TMDB + MovieLens），已随包携带，不依赖任何外部目录。
-5. Python 虚拟环境：本包已随带 `.venv`（Python 3.12）。若换机器后不可用
+4. Python 虚拟环境：本包已随带 `.venv`（Python 3.12）。若换机器后不可用
    （例如目标机未安装同路径 Python 3.12），在 `movie-system` 根目录**双击 `setup_venv.cmd`** 即可自动重建。
-6. 启动后端（工作目录必须是 `backend`）：
+5. 启动后端（工作目录必须是 `backend`）：
    - 命令行：`cd backend && mvn spring-boot:run`
    - 或打包后运行：`mvn clean package` 后 `java -jar target/mediaAnalysisSystem-3.0.3.jar`
    - IDE：用 IDE 打开 `backend`（Maven 工程），运行主类 `com.alvis.media.MediaApplication`（已附 `.vscode/launch.json`）
-7. 浏览器访问 `http://localhost:8000/admin`，登录 `admin / 123456`。
+6. 浏览器访问 `http://localhost:8000/admin`，登录 `admin / 123456`。
 
 #### 服务启停与重启（Windows / PowerShell）
 
@@ -228,8 +219,8 @@ Set-Location ..
 #    重跑后刷新网页（Ctrl+F5）即出新图。脚本基于自身位置定位数据与输出目录，任意目录执行均可。
 .venv\Scripts\python.exe algorithm/FeatureEDA/eda.py
 
-# 3. 推荐引擎冒烟测试（输出 Top10 JSON）
-.venv\Scripts\python.exe algorithm/recommendation/recommend_api.py --algo demographic
+# 3. 多算法对比训练（8 种算法 → metrics.json + 算法对比图 + 最佳模型 joblib）
+.venv\Scripts\python.exe algorithm/boxoffice_prediction/train_all.py
 ```
 
 **注意事项**
