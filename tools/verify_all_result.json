@@ -1,0 +1,159 @@
+{
+  "passed": 17,
+  "total": 17,
+  "items": [
+    {
+      "name": "管理员登录",
+      "call": "POST /api/user/login",
+      "http": 200,
+      "code": 1,
+      "pass": true,
+      "evidence": "cookie=SESSION,remember-me",
+      "message": "成功"
+    },
+    {
+      "name": "影片库统计",
+      "call": "GET /api/movie/stats",
+      "http": 200,
+      "code": 1,
+      "pass": true,
+      "evidence": "total=10000 withRevenue=5000 年份=[1887, 2018] 类型={'name': 'Drama', 'count': 4715}",
+      "message": "成功"
+    },
+    {
+      "name": "影片分页（按热度）",
+      "call": "POST /api/movie/page",
+      "http": 200,
+      "code": 1,
+      "pass": true,
+      "evidence": "total=10000 首条=Minions(热度547.5)",
+      "message": "成功"
+    },
+    {
+      "name": "影片筛选（类型=Animation）",
+      "call": "POST /api/movie/page",
+      "http": 200,
+      "code": 1,
+      "pass": true,
+      "evidence": "命中 464 部（列表显示主类型 mainGenre），如 ['Captain Underpants: The First Epic Movie', 'Big Hero 6', 'Minions']",
+      "message": "成功"
+    },
+    {
+      "name": "影片详情（Toy Story）",
+      "call": "GET /api/movie/detail/862",
+      "http": 200,
+      "code": 1,
+      "pass": true,
+      "evidence": "Toy Story (1995) 类型=['Comedy', 'Family', 'Animation'] 导演=John Lasseter 主演=10 公司=1 关键词=9",
+      "message": "成功"
+    },
+    {
+      "name": "单片预测（全字段）",
+      "call": "POST /api/predict",
+      "http": 200,
+      "code": 1,
+      "pass": true,
+      "evidence": "模型=RandomForest 随机森林 预测=68458589 区间={'low': 1319556, 'high': 3551631880} 插补=['演员规模 cast_size']",
+      "message": "成功"
+    },
+    {
+      "name": "单片预测（缺字段插补）",
+      "call": "POST /api/predict",
+      "http": 200,
+      "code": 1,
+      "pass": true,
+      "evidence": "预测=53419788 插补字段=['热度 popularity', '评分均值 vote_average', '评分人数 vote_count', '演员规模 cast_size', '上映年份 year', '类型 main_genre', '上映月份 month']",
+      "message": "成功"
+    },
+    {
+      "name": "8 算法对比",
+      "call": "GET /api/predict/algo-compare",
+      "http": 200,
+      "code": 1,
+      "pass": true,
+      "evidence": "最优=RandomForest 随机森林 RMSE=0.8750 R2=0.5910 训练/验证=4000/1000 特征=34 耗时=0.01s",
+      "message": "成功"
+    },
+    {
+      "name": "预测日志分页",
+      "call": "POST /api/predict/logs",
+      "http": 200,
+      "code": 1,
+      "pass": true,
+      "evidence": "日志总数=79 最新=2026-09-23T12:07:09.000+00:00 Silent Youth(RandomForest 随机森林)",
+      "message": "成功"
+    },
+    {
+      "name": "相似影片推荐（种子=Toy Story）",
+      "call": "POST /api/recommend",
+      "http": 200,
+      "code": 1,
+      "pass": true,
+      "evidence": "种子=Toy Story Top1=Toy Story 2 相似度=89.09% 耗时=0.06s 理由=同类型：Animation、Comedy、Family；同导演：John Lasseter",
+      "message": "成功"
+    },
+    {
+      "name": "类型热门推荐（Animation）",
+      "call": "POST /api/recommend",
+      "http": 200,
+      "code": 1,
+      "pass": true,
+      "evidence": "Top3=['Minions', 'Big Hero 6', 'Captain Underpants: The First Epic Movie'] 耗时=0.06s",
+      "message": "成功"
+    },
+    {
+      "name": "相似推荐（叠加站内评分）",
+      "call": "POST /api/recommend",
+      "http": 200,
+      "code": 1,
+      "pass": true,
+      "evidence": "Top1=Toy Story 2 理由=同类型：Animation、Comedy、Family",
+      "message": "成功"
+    },
+    {
+      "name": "批量预测（20 部测试集影片）",
+      "call": "POST /api/predict/batch",
+      "http": 200,
+      "code": 1,
+      "pass": true,
+      "evidence": "预测=20 条，落库=20 条，用时 2.81s（含起进程）；预测均值=589597 美元，区间 455~3676181",
+      "message": "成功"
+    },
+    {
+      "name": "视频管理回归",
+      "call": "POST /api/admin/video/page/list",
+      "http": 200,
+      "code": 1,
+      "pass": true,
+      "evidence": "视频总数=4903",
+      "message": "成功"
+    },
+    {
+      "name": "EDA 图静态映射（21 张中抽测 3 张）",
+      "call": "GET /eda/*.png",
+      "http": 200,
+      "code": 1,
+      "pass": true,
+      "evidence": "fig01_revenue_distribution.png 123KB; fig07_genre_revenue_box.png 81KB; corre.png 118KB",
+      "message": ""
+    },
+    {
+      "name": "算法对比图",
+      "call": "GET /algo-figures/algo_comparison.png",
+      "http": 200,
+      "code": null,
+      "pass": true,
+      "evidence": "HTTP 200 Content-Type=image/png 102KB",
+      "message": ""
+    },
+    {
+      "name": "管理端页面",
+      "call": "GET /admin",
+      "http": 200,
+      "code": null,
+      "pass": true,
+      "evidence": "HTTP 200",
+      "message": ""
+    }
+  ]
+}
