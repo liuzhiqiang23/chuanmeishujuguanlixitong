@@ -1,159 +1,265 @@
 <template>
   <div class="app-container">
-    <el-alert type="primary" :closable="false" show-icon class="mode-tip" :title="modeTip"/>
+    <el-card shadow="never" class="mb16">
+      <template #header>
+        <div class="card-header">
+          <span class="card-title">智能推荐</span>
+          <el-tag size="small" type="success">基于新数据集的内容相似（类型 / 关键词 / 演职员 / 公司 / 国家加权）</el-tag>
+        </div>
+      </template>
 
-    <el-form :inline="true">
-      <el-form-item label="推荐算法">
-        <el-select v-model="query.algo" style="width:300px">
-          <el-option v-for="a in algos" :key="a.value" :label="a.label" :value="a.value"/>
-        </el-select>
-      </el-form-item>
-      <el-form-item v-if="mode === 'user'" label="用户ID">
-        <el-input v-model="query.userId" placeholder="如 11（=MovieLens 用户1）" style="width:150px"/>
-      </el-form-item>
-      <el-form-item v-if="needMovie" label="电影名">
-        <el-input v-model="query.movieTitle" placeholder="如 The Dark Knight" style="width:220px"/>
-      </el-form-item>
-      <el-form-item v-if="query.algo === 'usr_keywords'" label="关键词">
-        <el-input v-model="query.keywords" placeholder="空格分隔，如 spy hero war army" style="width:220px"/>
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" :loading="loading" @click="search">生成推荐</el-button>
-      </el-form-item>
-    </el-form>
+      <el-tabs v-model="activeTab" @tab-click="onTab">
+        <!-- ---------- 策略 A：相似影片 ---------- -->
+        <el-tab-pane label="按影片相似" name="similar">
+          <el-form inline>
+            <el-form-item label="参考影片">
+              <el-select v-model="similar.movieId" filterable remote reserve-keyword
+                         placeholder="输入片名搜索" :remote-method="searchMovies"
+                         :loading="movieLoading" style="width:320px">
+                <el-option v-for="m in movieOptions" :key="m.id"
+                           :label="m.title + '（' + (m.year || '-') + '）'" :value="m.id"/>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="推荐数量">
+              <el-select v-model="similar.topN" style="width:110px">
+                <el-option v-for="n in [5, 10, 20]" :key="n" :label="n + ' 条'" :value="n"/>
+              </el-select>
+            </el-form-item>
+            <el-form-item>
+              <el-button type="primary" :loading="loading" @click="runSimilar">生成推荐</el-button>
+            </el-form-item>
+          </el-form>
+        </el-tab-pane>
 
-    <el-alert type="info" :closable="false" show-icon class="algo-tip" :title="tipText"/>
+        <!-- ---------- 策略 B：类型热门 ---------- -->
+        <el-tab-pane label="按类型热门" name="genre">
+          <el-form inline>
+            <el-form-item label="类型">
+              <el-select v-model="genreHot.genre" placeholder="选择类型" style="width:220px">
+                <el-option v-for="g in genres" :key="g.name" :label="g.name + '（' + g.count + ' 部）'" :value="g.name"/>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="推荐数量">
+              <el-select v-model="genreHot.topN" style="width:110px">
+                <el-option v-for="n in [5, 10, 20]" :key="n" :label="n + ' 条'" :value="n"/>
+              </el-select>
+            </el-form-item>
+            <el-form-item>
+              <el-button type="primary" :loading="loading" @click="runGenreHot">生成推荐</el-button>
+            </el-form-item>
+          </el-form>
+        </el-tab-pane>
+      </el-tabs>
 
-    <el-table v-loading="loading" :data="list" border fit style="width:100%">
-      <el-table-column prop="movieId" label="电影ID" width="120"/>
-      <el-table-column prop="title" label="电影名称"/>
-      <el-table-column prop="popularity" label="热度" width="100"/>
-      <el-table-column prop="voteAverage" label="均分" width="90"/>
-      <el-table-column prop="score" label="算法得分" width="120">
-        <template v-slot="{ row }">{{ row.score === null || row.score === undefined ? '-' : Number(row.score).toFixed(4) }}</template>
-      </el-table-column>
-    </el-table>
+      <el-alert type="info" :closable="false" show-icon class="mt8"
+                title="推荐理由一并返回：命中的共同类型 / 共同关键词 / 同导演 / 同主演等；若当前登录用户在站内给影片打过分（t_rating），服务端会自动把高分影片的类型偏好作为加权项（数据不足时自动跳过）。" />
+    </el-card>
+
+    <div v-loading="loading" class="rec-grid">
+      <div v-for="(item, idx) in items" :key="item.movieId" class="rec-card"
+           @click="$router.push({ path: '/movie/detail', query: { id: item.movieId } })">
+        <div class="rec-rank">{{ idx + 1 }}</div>
+        <el-image :src="posterUrl(item.posterPath)" fit="cover" class="rec-poster" lazy>
+          <template #error>
+            <div class="rec-holder">无海报</div>
+          </template>
+        </el-image>
+        <div class="rec-body">
+          <div class="rec-name" :title="item.title">{{ item.title }}</div>
+          <div class="rec-year">{{ item.year || '-' }}</div>
+          <div class="rec-score">
+            相似度
+            <b>{{ item.score == null ? '-' : (Number(item.score) * 100).toFixed(1) + '%' }}</b>
+          </div>
+          <div class="rec-reasons">
+            <el-tag v-for="r in (item.reasons || [])" :key="r" size="small" class="reason-tag">{{ r }}</el-tag>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="!loading && !items.length" class="empty-tip">
+      选择参考影片或类型后点击「生成推荐」（后端推荐接口于第六步接入）
+    </div>
   </div>
 </template>
 
 <script>
 import recommendApi from '@/api/recommend'
-
-// 按“用户属性 / 视频属性”划分的算法清单（与 Movie-Analysis-master/recommend_api.py 一一对应）
-const USER_ALGOS = [
-  { label: '① 人口统计热门（IMDB 加权）', value: 'demographic', user: false, movie: false },
-  { label: '② 用户协同过滤 KNN', value: 'user_knn', user: true, movie: false },
-  { label: '③ SVD 评分矩阵分解', value: 'svd', user: true, movie: false },
-  { label: '④ 集成：用户KNN + SVD', value: 'knn_svd', user: true, movie: false },
-  { label: '⑤ 集成：用户KNN + 关键词', value: 'usr_keywords', user: true, movie: false },
-  { label: '⑥ 集成：用户KNN + 电影KNN', value: 'usr_movie_knn', user: true, movie: true }
-]
-const VIDEO_ALGOS = [
-  { label: '① 基于电影简介（内容相似）', value: 'content', user: false, movie: true },
-  { label: '② 基于电影关键词（TF-IDF）', value: 'keyword', user: false, movie: true },
-  { label: '③ 电影相似度协同 KNN', value: 'movie_knn', user: false, movie: true }
-]
+import movieApi from '@/api/movie'
+import { posterUrl } from '@/utils/media'
 
 export default {
   name: 'RecommendIndex',
   data () {
     return {
-      query: { algo: '', userId: '11', movieTitle: 'The Dark Knight', keywords: '', top: 10 },
-      list: [],
-      loading: false
+      activeTab: 'similar',
+      loading: false,
+      items: [],
+      movieOptions: [],
+      movieLoading: false,
+      genres: [],
+      similar: { movieId: null, topN: 10 },
+      genreHot: { genre: '', topN: 10 }
     }
   },
-  computed: {
-    // 由路由 meta.mode 区分：user=用户属性推荐 / video=视频属性推荐
-    mode () {
-      return this.$route.meta && this.$route.meta.mode === 'video' ? 'video' : 'user'
-    },
-    algos () {
-      return this.mode === 'video' ? VIDEO_ALGOS : USER_ALGOS
-    },
-    currentAlgo () {
-      return this.algos.find(a => a.value === this.query.algo)
-    },
-    needUser () {
-      return !!(this.currentAlgo && this.currentAlgo.user)
-    },
-    needMovie () {
-      return !!(this.currentAlgo && this.currentAlgo.movie)
-    },
-    modeTip () {
-      if (this.mode === 'video') {
-        return '本页为「视频属性推荐」：从某部电影/视频的内容属性出发（简介、关键词、协同相似度），找出与之相似的影片。只需提供电影名，无需用户ID。'
-      }
-      return '本页为「用户属性推荐」：从观影用户的属性与行为出发（热门兜底、相似用户、评分矩阵等），为该用户生成个性化推荐。请填写 MovieLens 用户ID（页面中 11 = MovieLens 用户1）。'
-    },
-    tipText () {
-      const algo = this.query.algo
-      if (algo.startsWith('usr_') || algo === 'knn_svd') {
-        return '当前为集成/混合算法：先基于用户KNN生成候选电影，再结合第二种算法精排。服务端需训练多个协同过滤模型，耗时较长，请耐心等待。'
-      }
-      if (algo === 'user_knn' || algo === 'svd' || algo === 'movie_knn') {
-        return '提示：该算法需在服务端训练协同过滤模型，耗时较长，请耐心等待。'
-      }
-      return 'demographic 为全局热门榜（无需用户ID），content/keyword 为基于电影内容的相似推荐。'
+  created () {
+    // 菜单两个入口分别落到两个策略页签（兼容既有路由 /recommend/UserList 与 /recommend/subject/edit）
+    const mode = (this.$route.meta && this.$route.meta.mode) || 'user'
+    this.activeTab = mode === 'video' ? 'genre' : 'similar'
+    movieApi.stats().then(re => {
+      this.genres = ((re.response || {}).genreTop || []).slice(0, 15)
+    }).catch(() => {})
+    // 从影片详情"看相似影片"跳过来时带 movieId，自动跑一次
+    const mid = this.$route.query.movieId
+    if (mid) {
+      this.similar.movieId = Number(mid)
+      this.activeTab = 'similar'
+      this.searchMovies('')
+      this.runSimilar()
     }
-  },
-  watch: {
-    '$route.meta.mode' () {
-      this.query.algo = ''
-      this.list = []
-    }
-  },
-  mounted () {
-    this.resetAlgo()
   },
   methods: {
-    resetAlgo () {
-      // 默认算法：用户模式=热门兜底；视频模式=内容相似
-      this.query.algo = this.mode === 'video' ? 'content' : 'demographic'
-      this.list = []
+    posterUrl,
+    onTab () {
+      this.items = []
     },
-    search () {
-      const algo = this.query.algo
-      if (!algo) {
-        this.$message.warning('请先选择推荐算法')
+    searchMovies (kw) {
+      if (!kw) kw = ''
+      this.movieLoading = true
+      movieApi.page({ pageIndex: 1, pageSize: 20, keyword: kw, sortBy: 'popularity', sortOrder: 'desc' })
+        .then(re => {
+          this.movieOptions = ((re.response || {}).list || [])
+          this.movieLoading = false
+        }).catch(() => { this.movieLoading = false })
+    },
+    runSimilar () {
+      if (!this.similar.movieId) {
+        this.$message.warning('请先选择参考影片')
         return
       }
-      if (this.needUser && (this.query.userId === '' || this.query.userId == null)) {
-        this.$message.error('算法「' + this.algoLabel(algo) + '」需要填写用户ID（如 11 = MovieLens 用户1）')
+      this.call({ strategy: 'similar', movieId: this.similar.movieId, topN: this.similar.topN })
+    },
+    runGenreHot () {
+      if (!this.genreHot.genre) {
+        this.$message.warning('请先选择类型')
         return
       }
-      if (this.needMovie && (this.query.movieTitle === '' || this.query.movieTitle == null)) {
-        this.$message.error('算法「' + this.algoLabel(algo) + '」需要填写电影名（如 The Dark Knight）')
-        return
-      }
-      if (algo === 'usr_keywords' && (this.query.keywords === '' || this.query.keywords == null)) {
-        this.$message.error('算法「' + this.algoLabel(algo) + '」需要填写关键词（空格分隔，如 spy hero war army）')
-        return
-      }
+      this.call({ strategy: 'genre_hot', genre: this.genreHot.genre, topN: this.genreHot.topN })
+    },
+    call (q) {
       this.loading = true
-      const q = { algo: algo, top: this.query.top }
-      if (this.needUser) q.userId = Number(this.query.userId)
-      if (this.needMovie) q.movieTitle = this.query.movieTitle.trim()
-      if (algo === 'usr_keywords') q.keywords = this.query.keywords.trim()
       recommendApi.recommend(q).then(re => {
-        this.list = re.response || []
+        this.items = ((re.response || {}).items) || []
         this.loading = false
       }).catch(() => { this.loading = false })
-    },
-    algoLabel (value) {
-      const all = USER_ALGOS.concat(VIDEO_ALGOS)
-      const hit = all.find(a => a.value === value)
-      return hit ? hit.label : value
     }
   }
 }
 </script>
 
 <style scoped>
-.mode-tip {
-  margin-bottom: 14px;
+.mb16 {
+  margin-bottom: 16px;
 }
-.algo-tip {
-  margin-bottom: 12px;
+.mt8 {
+  margin-top: 8px;
+}
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-right: 8px;
+}
+.rec-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 16px;
+  min-height: 120px;
+}
+.rec-card {
+  position: relative;
+  background: #fff;
+  border: 1px solid #ebeef5;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow .2s, transform .2s;
+}
+.rec-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, .12);
+  transform: translateY(-2px);
+}
+.rec-rank {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  background: rgba(64, 158, 255, .92);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-bottom-right-radius: 6px;
+}
+.rec-poster {
+  width: 100%;
+  height: 260px;
+  display: block;
+  background: #f5f7fa;
+}
+.rec-holder {
+  height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #c0c4cc;
+  font-size: 13px;
+  background: #f5f7fa;
+}
+.rec-body {
+  padding: 10px 12px 12px;
+}
+.rec-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #303133;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rec-year {
+  font-size: 12px;
+  color: #909399;
+  margin-top: 2px;
+}
+.rec-score {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #909399;
+}
+.rec-score b {
+  color: #67c23a;
+  font-size: 14px;
+}
+.rec-reasons {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.reason-tag {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.empty-tip {
+  color: #909399;
+  text-align: center;
+  padding: 40px 0;
 }
 </style>

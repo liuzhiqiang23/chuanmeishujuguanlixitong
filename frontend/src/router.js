@@ -199,13 +199,13 @@ const constantRoutes = [
         path: 'UserList',
         component: () => import('@/views/recommend/index'),
         name: 'RecommendIndex',
-        meta: { title: '用户属性推荐', noCache: true, mode: 'user' }
+        meta: { title: '相似影片推荐', noCache: true, mode: 'user' }
       },
       {
         path: 'subject/edit',
         component: () => import('@/views/recommend/index'),
         name: 'RecommendMovieIndex',
-        meta: { title: '视频属性推荐', noCache: true, mode: 'video' }
+        meta: { title: '类型热门推荐', noCache: true, mode: 'video' }
       }
     ]
   },
@@ -224,6 +224,37 @@ const constantRoutes = [
         component: () => import('@/views/predict/index'),
         name: 'PredictIndex',
         meta: { title: '票房预测', noCache: true }
+      },
+      {
+        path: 'compare',
+        component: () => import('@/views/predict/compare'),
+        name: 'PredictCompare',
+        meta: { title: '算法对比', noCache: true }
+      }
+    ]
+  },
+  {
+    path: '/movie',
+    component: Layout,
+    name: 'MoviePage',
+    meta: {
+      title: '影片库',
+      icon: 'table'
+    },
+    alwaysShow: true,
+    children: [
+      {
+        path: 'list',
+        component: () => import('@/views/movie/list'),
+        name: 'MovieListPage',
+        meta: { title: '影片库（新数据集）', noCache: true }
+      },
+      {
+        path: 'detail',
+        component: () => import('@/views/movie/detail'),
+        name: 'MovieDetailPage',
+        hidden: true,
+        meta: { title: '影片详情', noCache: true }
       }
     ]
   },
