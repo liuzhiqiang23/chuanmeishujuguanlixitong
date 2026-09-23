@@ -9,6 +9,22 @@
     <view class="home-cate" bindtap="goCategory">分类</view>
   </view>
 
+  <!-- 影片分类：宫格直达（点格子进分类页并选中该分类） -->
+  <view class="card cate-card">
+    <view class="row-between">
+      <text class="title">影片分类</text>
+      <text class="muted cate-more" bindtap="goCategory">全部分类 ›</text>
+    </view>
+    <view class="cate-grid">
+      <view class="cate-cell" wx:for="{{cates}}" wx:key="tagId"
+            data-id="{{item.tagId}}" data-name="{{item.tagName}}" bindtap="goCategoryTag">
+        <text class="cate-name">{{item.tagName}}</text>
+        <text class="cate-count">{{item.videoCount}} 部</text>
+      </view>
+    </view>
+    <view class="empty" wx:if="{{cates.length === 0}}" style="padding:30rpx 0">分类加载中...</view>
+  </view>
+
   <!-- 会员状态条 -->
   <view class="member-bar" bindtap="goMember">
     <view class="row-between">

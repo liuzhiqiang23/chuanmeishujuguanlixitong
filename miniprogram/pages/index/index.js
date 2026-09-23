@@ -7,6 +7,7 @@ Page({
     member: null,
     videos: [],
     coupons: [],
+    cates: [],
     loading: true,
     pageIndex: 1,
     hasNext: false,
@@ -16,6 +17,7 @@ Page({
 
   onLoad() {
     this.setData({ base: api.baseUrl() });
+    this.loadCates();
   },
 
   onShow() {
@@ -38,6 +40,20 @@ Page({
         }
       });
     }).catch(() => {});
+  },
+
+  /** 首页分类宫格：和分类页同一个接口，只取前 12 个（按影片数排序，热度高的在前） */
+  loadCates() {
+    api.post('/api/wx/category/list', { minCount: 20, limit: 24 }, { needLogin: false }).then((list) => {
+      this.setData({ cates: (list || []).slice(0, 12) });
+    }).catch(() => {});
+  },
+
+  /** 点宫格里的分类：进分类页并直接选中该分类 */
+  goCategoryTag(e) {
+    const id = e.currentTarget.dataset.id;
+    const name = e.currentTarget.dataset.name || '';
+    wx.navigateTo({ url: '/pages/category/category?tagId=' + id + '&tagName=' + encodeURIComponent(name) });
   },
 
   loadCoupons() {

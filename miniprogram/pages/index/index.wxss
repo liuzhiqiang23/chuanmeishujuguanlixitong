@@ -1,35 +1,45 @@
+/* 首页：深空科幻风 */
+
+/* 顶部会员横幅：青紫渐变 + 辉光 */
 .member-bar {
   margin: 20rpx 24rpx;
   padding: 30rpx 28rpx;
-  border-radius: 16rpx;
-  background: linear-gradient(135deg, #2F7FD1, #4E9BE8);
-  color: #FFFFFF;
+  border-radius: 18rpx;
+  background: linear-gradient(135deg, rgba(0, 229, 255, 0.16), rgba(123, 92, 255, 0.22));
+  border: 1rpx solid rgba(0, 229, 255, 0.35);
+  box-shadow: 0 0 30rpx rgba(0, 229, 255, 0.18), 0 10rpx 30rpx rgba(0, 0, 0, 0.4);
+  color: #EAF6FF;
 }
 
 .member-title {
   font-size: 34rpx;
   font-weight: 600;
+  letter-spacing: 2rpx;
+  text-shadow: 0 0 14rpx rgba(0, 229, 255, 0.6);
 }
 
 .member-sub {
   font-size: 24rpx;
-  opacity: 0.85;
+  color: #9FB6E8;
   margin-top: 8rpx;
 }
 
 .member-btn {
-  background: #FFFFFF;
-  color: #2F7FD1;
+  background: linear-gradient(135deg, #00E5FF, #7B5CFF);
+  color: #06091A;
   font-size: 26rpx;
+  font-weight: 600;
   padding: 10rpx 28rpx;
   border-radius: 40rpx;
+  box-shadow: 0 0 20rpx rgba(0, 229, 255, 0.4);
 }
 
+/* 优惠券列表：霓虹分隔 */
 .coupon-item {
   display: flex;
   align-items: center;
   padding: 20rpx 0;
-  border-bottom: 2rpx solid #F2F2F2;
+  border-bottom: 1rpx solid rgba(0, 229, 255, 0.14);
 }
 
 .coupon-item:last-child {
@@ -39,14 +49,15 @@
 .coupon-left {
   width: 150rpx;
   text-align: center;
-  border-right: 2rpx dashed #E5E5E5;
+  border-right: 2rpx dashed rgba(0, 229, 255, 0.35);
   margin-right: 20rpx;
 }
 
 .coupon-amount {
-  color: #E64545;
+  color: #FF4D6D;
   font-size: 40rpx;
   font-weight: 600;
+  text-shadow: 0 0 14rpx rgba(255, 77, 109, 0.5);
 }
 
 .coupon-mid {
@@ -54,11 +65,61 @@
 }
 
 .coupon-btn {
-  background: #E64545;
+  background: linear-gradient(135deg, #FF4D6D, #7B5CFF);
   color: #FFFFFF;
   font-size: 26rpx;
   padding: 10rpx 26rpx;
   border-radius: 40rpx;
+  box-shadow: 0 0 18rpx rgba(255, 77, 109, 0.35);
+}
+
+/* 影片分类宫格：玻璃芯片 */
+.cate-card {
+  margin-bottom: 0;
+}
+
+.cate-more {
+  padding: 8rpx 0 8rpx 20rpx;
+}
+
+.cate-grid {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 16rpx;
+}
+
+.cate-cell {
+  width: 155rpx;
+  margin: 0 10rpx 14rpx 0;
+  padding: 18rpx 0 14rpx;
+  text-align: center;
+  background: rgba(0, 229, 255, 0.07);
+  border: 1rpx solid rgba(0, 229, 255, 0.2);
+  border-radius: 14rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cate-cell:nth-child(4n) {
+  margin-right: 0;
+}
+
+.cate-cell:active {
+  background: rgba(0, 229, 255, 0.18);
+  box-shadow: 0 0 18rpx rgba(0, 229, 255, 0.35);
+}
+
+.cate-name {
+  color: #00E5FF;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.cate-count {
+  color: #7C89B8;
+  font-size: 22rpx;
+  margin-top: 4rpx;
 }
 
 /* 搜索入口 + 分类 */
@@ -73,18 +134,21 @@
   display: flex;
   align-items: center;
   height: 72rpx;
-  background: #FFFFFF;
+  background: rgba(18, 28, 62, 0.72);
+  border: 1rpx solid rgba(0, 229, 255, 0.28);
   border-radius: 36rpx;
   padding: 0 28rpx;
+  box-shadow: 0 0 18rpx rgba(0, 229, 255, 0.1);
 }
 
 .home-search-icon {
   font-size: 26rpx;
   margin-right: 12rpx;
+  color: #00E5FF;
 }
 
 .home-search-hint {
-  color: #9AA0A8;
+  color: #7C89B8;
   font-size: 28rpx;
 }
 
@@ -93,9 +157,10 @@
   padding: 0 28rpx;
   height: 72rpx;
   line-height: 72rpx;
-  background: #FFFFFF;
+  background: rgba(0, 229, 255, 0.1);
+  border: 1rpx solid rgba(0, 229, 255, 0.4);
   border-radius: 36rpx;
-  color: #2F7FD1;
+  color: #00E5FF;
   font-size: 28rpx;
 }
 
@@ -108,7 +173,7 @@
 }
 
 .share-text {
-  color: #9AA0A8;
+  color: #7C89B8;
   font-size: 24rpx;
 }
 
@@ -119,8 +184,9 @@
   line-height: 56rpx;
   font-size: 26rpx;
   color: #FFFFFF;
-  background: #E55A5A;
+  background: linear-gradient(135deg, #FF4D6D, #7B5CFF);
   border-radius: 28rpx;
+  box-shadow: 0 0 16rpx rgba(255, 77, 109, 0.35);
 }
 
 .share-btn::after {
