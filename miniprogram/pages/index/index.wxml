@@ -75,7 +75,7 @@
     <view class="divider"></view>
     <view class="video-item" wx:for="{{videos}}" wx:key="videoId"
           data-id="{{item.videoId}}" bindtap="goDetail">
-      <image class="poster" src="{{item.posterSrc}}" mode="aspectFill" lazy-load
+      <image class="poster" src="{{item.posterSrc}}" mode="widthFix" lazy-load
              data-src="{{item.posterSrc}}" catchtap="previewPoster"></image>
       <view class="video-info">
         <view class="video-name">{{item.videoName}}</view>
