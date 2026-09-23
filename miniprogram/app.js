@@ -15,7 +15,7 @@
 // application.yml 里走 ${WX_SECRET:} 环境变量 + local_env.cmd）。
 const API_BASES = [
   'http://127.0.0.1:8000',
-  'http://192.168.83.214:8000',
+  'http://192.168.42.214:8000',
   'https://movie.jszzbinfo.cn',
   'http://122.51.194.86'
 ];
