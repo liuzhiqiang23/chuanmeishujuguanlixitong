@@ -126,6 +126,10 @@
               </div>
             </el-col>
           </el-row>
+          <div v-if="(result.imputedFields || []).length" class="imputed-tip">
+            <i class="el-icon-warning-outline"/> 未提供的字段已按训练集中位数补齐：{{ result.imputedFields.join('、') }}
+            —— 未提供评分人数等信息时预测不确定性更大（参考区间也会更宽）。
+          </div>
         </el-card>
       </el-tab-pane>
 
@@ -351,5 +355,15 @@ export default {
 }
 .result-metrics b {
   color: #67c23a;
+}
+.imputed-tip {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: #fdf6ec;
+  border-left: 3px solid #e6a23c;
+  color: #b88230;
+  font-size: 13px;
+  line-height: 1.7;
+  border-radius: 2px;
 }
 </style>

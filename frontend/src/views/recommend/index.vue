@@ -68,8 +68,8 @@
           <div class="rec-name" :title="item.title">{{ item.title }}</div>
           <div class="rec-year">{{ item.year || '-' }}</div>
           <div class="rec-score">
-            相似度
-            <b>{{ item.score == null ? '-' : (Number(item.score) * 100).toFixed(1) + '%' }}</b>
+            {{ isSimilar ? '相似度' : '热度分' }}
+            <b>{{ fmtScore(item.score) }}</b>
           </div>
           <div class="rec-reasons">
             <el-tag v-for="r in (item.reasons || [])" :key="r" size="small" class="reason-tag">{{ r }}</el-tag>
@@ -94,6 +94,7 @@ export default {
   data () {
     return {
       activeTab: 'similar',
+      strategy: 'similar',
       loading: false,
       items: [],
       movieOptions: [],
@@ -101,6 +102,11 @@ export default {
       genres: [],
       similar: { movieId: null, topN: 10 },
       genreHot: { genre: '', topN: 10 }
+    }
+  },
+  computed: {
+    isSimilar () {
+      return this.strategy !== 'genre_hot'
     }
   },
   created () {
@@ -150,9 +156,16 @@ export default {
     call (q) {
       this.loading = true
       recommendApi.recommend(q).then(re => {
-        this.items = ((re.response || {}).items) || []
+        const d = re.response || {}
+        this.items = d.items || []
+        this.strategy = d.strategy || q.strategy || 'similar'
         this.loading = false
       }).catch(() => { this.loading = false })
+    },
+    fmtScore (v) {
+      if (v == null) return '-'
+      // 相似度是 0~1 的余弦相似度，用百分比更直观；类型热门是 z 分数，保留两位小数
+      return this.isSimilar ? (Number(v) * 100).toFixed(1) + '%' : Number(v).toFixed(2)
     }
   }
 }

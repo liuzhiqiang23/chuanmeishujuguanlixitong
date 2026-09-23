@@ -52,8 +52,12 @@ ONEHOT_GENRE = "main_genre"      # Top10 独热
 ONEHOT_COUNTRY = "main_country"  # Top6 独热
 
 
-def build_features(df: pd.DataFrame) -> pd.DataFrame:
-    """从 train_clean 构造建模特征矩阵"""
+def build_features(df: pd.DataFrame, meta_out: dict = None) -> pd.DataFrame:
+    """从 train_clean 构造建模特征矩阵
+
+    meta_out 非 None 时顺带回填在线推理所需的元数据（独热类别表、runtime 中位数），
+    推理脚本据此重建完全一致的 34 维特征（见 docs/04_系统详细设计.md §4.2）。
+    """
     X = pd.DataFrame(index=df.index)
     for c in NUM_FEATURES:
         X[c] = pd.to_numeric(df[c], errors="coerce")
@@ -73,6 +77,16 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
         cat = df[col].where(df[col].isin(top), other="Other")
         dummies = pd.get_dummies(cat, prefix=col).astype(int)
         X = pd.concat([X, dummies], axis=1)
+        if meta_out is not None:
+            meta_out[f"{col}_categories"] = list(dummies.columns)
+    if meta_out is not None:
+        meta_out["runtime_median"] = float(X["runtime"].median())
+        meta_out["year_median"] = float(pd.to_numeric(df["year"], errors="coerce").median())
+        # 在线推理时"用户未提供的字段"用训练集中位数补齐（比填 0 更接近真实影片，
+        # 填 0 会把新片推到特征空间最角落，导致预测系统性偏低）
+        meta_out["defaults"] = {c: float(X[c].median()) for c in
+                                ("vote_average", "log_vote_count", "log_popularity", "n_genres",
+                                 "n_keywords", "n_countries", "n_companies", "n_languages", "cast_size")}
     return X
 
 
@@ -98,7 +112,8 @@ def build_models():
 def main():
     df = pd.read_csv(DATA_PATH, low_memory=False)
     df = df.dropna(subset=[TARGET]).copy()
-    X = build_features(df)
+    meta = {}
+    X = build_features(df, meta)
     y = df[TARGET].astype(float)
 
     X_tr, X_va, y_tr, y_va = train_test_split(X, y, test_size=0.2, random_state=SEED)
@@ -134,6 +149,19 @@ def main():
     joblib.dump({"model": best_entry, "features": list(X.columns)},
                 os.path.join(MODEL_DIR, "best_model.joblib"))
 
+    # ---- 在线推理元数据（predict_api.py 必读：列顺序 + 独热类别表 + 中位数 + 指标）----
+    meta.update({
+        "columns": list(X.columns),
+        "target": TARGET,
+        "seed": SEED,
+        "best": best["name"],
+        "metrics": {"rmse": best["rmse"], "mae": best["mae"], "r2": best["r2"]},
+        "numeric_features": list(NUM_FEATURES),
+    })
+    with open(os.path.join(MODEL_DIR, "feature_meta.json"), "w", encoding="utf-8") as f:
+        json.dump(meta, f, ensure_ascii=False, indent=2)
+    print(f"推理元数据: {os.path.join(MODEL_DIR, 'feature_meta.json')}")
+
     # ---- 对比图 ----
     plt.rcParams["font.sans-serif"] = ["Microsoft YaHei", "SimHei", "DejaVu Sans"]
     plt.rcParams["axes.unicode_minus"] = False
@@ -159,5 +187,35 @@ def main():
     print(f"指标汇总: {os.path.join(SCRIPT_DIR, 'metrics.json')}")
 
 
+def dump_meta_only():
+    """只重建推理元数据（不重新训练）：元数据完全由训练集与既有 metrics.json 推导"""
+    df = pd.read_csv(DATA_PATH, low_memory=False)
+    df = df.dropna(subset=[TARGET]).copy()
+    meta = {}
+    X = build_features(df, meta)
+
+    metrics, best = {}, ""
+    metrics_path = os.path.join(SCRIPT_DIR, "metrics.json")
+    if os.path.exists(metrics_path):
+        with open(metrics_path, encoding="utf-8") as f:
+            m = json.load(f)
+        best = m.get("best", "")
+        entry = next((a for a in m.get("algorithms", []) if a["name"] == best), None)
+        if entry:
+            metrics = {"rmse": entry["rmse"], "mae": entry["mae"], "r2": entry["r2"]}
+
+    meta.update({"columns": list(X.columns), "target": TARGET, "seed": SEED, "best": best,
+                 "metrics": metrics, "numeric_features": list(NUM_FEATURES)})
+    out = os.path.join(MODEL_DIR, "feature_meta.json")
+    with open(out, "w", encoding="utf-8") as f:
+        json.dump(meta, f, ensure_ascii=False, indent=2)
+    print(f"推理元数据已生成: {out}")
+    print(f"  特征列 {len(meta['columns'])} 维 | 类型独热 {len(meta['main_genre_categories'])} 类 "
+          f"| 国家独热 {len(meta['main_country_categories'])} 类 | runtime 中位数 {meta['runtime_median']}")
+
+
 if __name__ == "__main__":
-    main()
+    if "--dump-meta" in sys.argv:
+        dump_meta_only()
+    else:
+        main()
