@@ -26,6 +26,7 @@ CREATE TABLE t_movie (
   vote_average     FLOAT                 DEFAULT 0    COMMENT '均分',
   vote_count       INT                   DEFAULT 0    COMMENT '评分人数',
   original_language VARCHAR(16)          DEFAULT NULL COMMENT '原声语言',
+  main_genre       VARCHAR(64)          DEFAULT NULL COMMENT '主类型（预处理派生，取 TMDB 首个类型）',
   status           VARCHAR(32)           DEFAULT NULL COMMENT '发行状态',
   homepage         VARCHAR(500)          DEFAULT NULL,
   poster_path      VARCHAR(255)          DEFAULT NULL COMMENT '海报路径',
@@ -35,7 +36,8 @@ CREATE TABLE t_movie (
   PRIMARY KEY (id),
   KEY idx_year (year),
   KEY idx_revenue (revenue),
-  KEY idx_name (video_name)
+  KEY idx_name (video_name),
+  KEY idx_main_genre (main_genre)
 ) ENGINE=InnoDB COMMENT='电影主表';
 
 -- 2. 类型字典
