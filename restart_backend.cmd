@@ -34,12 +34,16 @@ if errorlevel 1 (echo   [WARN] Redis 6379 is NOT listening) else (echo   Redis 6
 
 echo.
 echo [1/4] Looking for the process holding port 8000 ...
+rem PID is the last column (5) of netstat output - no PowerShell needed.
+rem The previous Get-NetTCPConnection variant returned empty in some restricted
+rem environments, so the old instance was never killed, the new one could not
+rem bind the port, and the health check was actually answered by the old one.
 set "PID="
-for /f "delims=" %%p in ('powershell -NoProfile -Command "$c = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue ^| Select-Object -First 1; if ($c) { $c.OwningProcess }"') do set "PID=%%p"
+for /f "tokens=5" %%p in ('netstat -ano ^| findstr :8000 ^| findstr LISTENING') do set "PID=%%p"
 if defined PID (
   echo   Found PID=%PID% - terminating ...
   taskkill /PID %PID% /F
-  timeout /t 2 >nul
+  ping -n 3 127.0.0.1 >nul
 ) else (
   echo   No process is listening on port 8000.
 )
@@ -52,6 +56,8 @@ start "" /MIN cmd /c "cd /d backend && set DB_PASSWORD=123456&& mvn -q -Dmaven.t
 
 echo.
 echo [3/4] Waiting for port 8000 (max ~180s) ...
+rem "ping -n" instead of "timeout /t": timeout refuses to run when stdin is
+rem redirected (e.g. when a caller chains this script), ping always waits.
 set "UP=0"
 for /L %%i in (1,1,60) do (
   netstat -ano | findstr :8000 | findstr LISTENING >nul
@@ -60,7 +66,7 @@ for /L %%i in (1,1,60) do (
     echo   Backend is UP.
     goto :health
   )
-  timeout /t 3 >nul
+  ping -n 4 127.0.0.1 >nul
 )
 
 :health
@@ -83,4 +89,6 @@ echo ------------------------------------------------------------
 
 :done
 endlocal
+rem -nopause: skip the final pause, used by chained callers such as start_all.cmd
+if /i "%~1"=="-nopause" exit /b 0
 pause

@@ -11,27 +11,34 @@
 
 ```text
 movie-system/                          # 系统根目录（整个目录拷贝到任何机器即可部署，零外部依赖）
-├── .venv/                             # Python 3.12 虚拟环境（算法依赖已装好；不可用时可运行 setup_venv.cmd 重建）
+├── .venv/                             # Python 3.13 虚拟环境（算法依赖已装好；不可用时可运行 setup_venv.cmd 重建）
 ├── data/                              # 统一数据集目录（工程唯一数据根，各算法模块共享）
 │   ├── train.csv                      # 票房预测训练数据（含票房标签，5000 部）
 │   ├── test.csv                       # 票房预测测试数据（待预测，5000 部，无票房列）
 │   ├── new_source/                    # Kaggle The Movies Dataset 原始下载件（不入库，可删）
 │   ├── make_new_dataset.py            # 数据集抽样脚本：三表合并去重 → 固定种子 42 抽 5000+5000
 │   └── processed/                     # 清洗与特征工程产物（preprocess.py 生成）
-├── doc/                               # 文档
 ├── algorithm/                         # Python 算法引擎（不含数据，统一从 data/ 读取）
 │   ├── FeatureEDA/                    #   需求一：数据分析与特征可视化
 │   │   ├── preprocess.py              #     数据清洗与特征工程（共享流水线）
 │   │   ├── eda.py                     #     EDA 唯一图脚本：一次生成 21 张图（fig01~fig14 + 7 张网页图）
 │   │   └── figures/                   #     EDA 输出图（后端 /eda/** 挂载，无需 Python 在线）
-│   └── boxoffice_prediction/          #   需求二：电影票房预测
-│       ├── train_all.py               #     8 种算法一键对比训练（metrics.json + 对比图 + 最佳模型）
-│       └── metrics.json               #     各算法评估指标（RMSE / MAE / R²）
+│   ├── boxoffice_prediction/          #   需求二：电影票房预测
+│   │   ├── train_all.py               #     8 种算法一键对比训练（metrics.json + 对比图 + 最佳模型）
+│   │   ├── predict_api.py             #     在线推理服务（单片 / 批量，供后端 ProcessBuilder 调用）
+│   │   └── metrics.json               #     各算法评估指标（RMSE / MAE / R²）
+│   └── movie_recommendation/          #   需求三：智能推荐（内容相似 + 类型热门）
+│       └── recommend_api.py           #     推荐服务（加权余弦相似度，磁盘缓存加速）
+├── docs/                              # 作业分层文档（需求分析 / 概要设计 / 详细设计 / 审查 / 联调测试记录）
 ├── sql/                               # 数据库建库 / 修复 / 数据导入脚本
 ├── backend/                           # Spring Boot 后端（内嵌编译好的前端页面，端口 8000）
 ├── frontend/                          # Vue 前端源码（构建产物位于 backend/src/main/resources/static/admin）
 ├── requirements.txt                   # Python 依赖清单
-└── setup_venv.cmd                     # 新机器一键重建 Python 虚拟环境
+├── setup_venv.cmd                     # 新机器一键重建 Python 虚拟环境
+├── start_all.cmd                      # ★ 一键启动：环境自检 → 重启后端 → 打开浏览器（详见《用户手册.md》）
+├── restart_backend.cmd                # 仅重启后端（杀 8000 端口旧进程 → 后台启动 → 健康检查）
+├── 用户手册.md                        # ★ 环境 / 一键启动 / 全新部署 / 功能说明 / 算法 / 数据库 / FAQ
+└── 项目结构.md                        # 目录总览、数据流、配置一览、八步作业与提交对照
 ```
 
 **数据目录规范（重要）**
@@ -54,7 +61,7 @@ movie-system/                          # 系统根目录（整个目录拷贝到
 | ------ | --------------- | ---------------------------- |
 | JDK    | 17+（21/26 亦可） | 后端                        |
 | Maven  | 3.9+            | 后端构建                     |
-| MySQL  | 8.x             | 数据库（库名 vidio_mangage_db）|
+| MySQL  | 8.x             | 数据库（库名 movie_analytics_db，含新项目 15 张表 + 框架 19 张表）|
 | Redis  | 5+（127.0.0.1:6379，默认无密码） | 会话缓存 |
 | Python | 3.10~3.12（仅在重建虚拟环境时需要） | 算法引擎 |
 
@@ -62,12 +69,17 @@ movie-system/                          # 系统根目录（整个目录拷贝到
 
 1. 拷贝整个 `movie-system` 文件夹到目标机器（路径随意，推荐纯英文路径）。
 2. 启动 MySQL 与 Redis 服务。
-3. 初始化数据库（建库建表，Windows 在 mysql bin 目录或配好 PATH 后执行）：
+3. 初始化数据库（建库建表，Windows 在 mysql bin 目录或配好 PATH 后执行；详见《用户手册.md》§4.2）：
    ```bash
-   mysql -uroot -p123456 < sql/vidio_mangage_db.sql
+   # ① 新项目 15 张表
+   mysql -uroot -p123456 < sql/movie_analytics_db.sql
+   # ② 框架 19 张表 + 演示数据（用户/影片/商城/日志）
+   mysql -uroot -p123456 movie_analytics_db < sql/backup_vidio_mangage_db_20260922.sql
+   # ③ 新数据集入库（10000 部影片及关联表，约 40 秒）
+   .venv\Scripts\python.exe sql/import_movie_dataset.py
    ```
-4. Python 虚拟环境：本包已随带 `.venv`（Python 3.12）。若换机器后不可用
-   （例如目标机未安装同路径 Python 3.12），在 `movie-system` 根目录**双击 `setup_venv.cmd`** 即可自动重建。
+4. Python 虚拟环境：本包已随带 `.venv`（Python 3.13）。若换机器后不可用
+   （例如目标机未安装同路径 Python 3.13），在 `movie-system` 根目录**双击 `setup_venv.cmd`** 即可自动重建。
 5. 启动后端（工作目录必须是 `backend`）：
    - 命令行：`cd backend && mvn spring-boot:run`
    - 或打包后运行：`mvn clean package` 后 `java -jar target/mediaAnalysisSystem-3.0.3.jar`
