@@ -126,17 +126,17 @@ CREATE TABLE t_movie_country (
   KEY idx_country (country_id)
 ) ENGINE=InnoDB COMMENT='电影-国家关联';
 
--- 13. 用户
-CREATE TABLE t_user (
+-- 13. 用户（站内评分用户；命名为 t_movie_user 以避开框架登录表 t_user，避免迁入同库时重名）
+CREATE TABLE t_movie_user (
   id         INT AUTO_INCREMENT PRIMARY KEY,
   username   VARCHAR(64)  NOT NULL UNIQUE,
   password   VARCHAR(255) NOT NULL COMMENT 'RSA 加密存储',
   nickname   VARCHAR(64)  DEFAULT NULL,
   role       VARCHAR(16)  DEFAULT 'user' COMMENT 'user/admin',
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB COMMENT='用户';
+) ENGINE=InnoDB COMMENT='站内评分用户（与框架登录表 t_user 区分）';
 
--- 14. 用户评分（推荐算法数据源）
+-- 14. 用户评分（推荐算法数据源；user_id → t_movie_user.id）
 CREATE TABLE t_rating (
   id         INT AUTO_INCREMENT PRIMARY KEY,
   user_id    INT      NOT NULL,
