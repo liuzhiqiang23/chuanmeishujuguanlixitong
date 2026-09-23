@@ -1,3 +1,6 @@
+-- 历史存档：早期在旧库 vidio_mangage_db 上做的电影元数据扩展脚本。
+-- 旧库已于 2026-09-23 迁移合并且删除，现系统唯一库为 movie_analytics_db。
+-- 注意：如需在全新环境重建框架表，请使用 sql/backup/ 的库备份或 movie_analytics_db.sql 的新表部分。
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 

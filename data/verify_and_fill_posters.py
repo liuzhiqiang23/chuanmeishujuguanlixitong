@@ -59,7 +59,7 @@ def main():
     sess.headers['User-Agent'] = 'Mozilla/5.0 (movie-system)'
 
     conn = pymysql.connect(host='127.0.0.1', user='root', password='123456',
-                           database='vidio_mangage_db', charset='utf8mb4')
+                           database='movie_analytics_db', charset='utf8mb4')
     cur = conn.cursor()
 
     def tmdb_get(vid):
