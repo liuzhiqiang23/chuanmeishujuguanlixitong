@@ -31,7 +31,7 @@ if errorlevel 1 goto :PIP_ERR
 
 echo.
 echo [OK] Done! Virtual env is ready at movie-system\.venv
-echo      Smoke test: %VENV%\Scripts\python.exe algorithm\recommendation\recommend_api.py --algo demographic
+echo      Smoke test: %VENV%\Scripts\python.exe algorithm\FeatureEDA\eda.py
 pause
 exit /b 0
 

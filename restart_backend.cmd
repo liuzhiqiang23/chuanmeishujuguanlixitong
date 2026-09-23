@@ -7,7 +7,7 @@ rem          project root (movie-system).
 rem  Steps : 0 check MySQL/Redis -> 1 find process on port 8000 and kill it
 rem          -> 2 start backend in background (log: _boot.log)
 rem          -> 3 wait until port 8000 is listening
-rem          -> 4 health check (HTTP page + recommend API)
+rem          -> 4 health check (HTTP page + public API)
 rem
 rem  Note  : -Dmaven.test.skip=true is REQUIRED: src/test still uses JUnit4
 rem          annotations while Spring Boot 3.5 ships JUnit5, so test-compile
@@ -73,7 +73,7 @@ if "%UP%"=="0" (
 echo.
 echo [4/4] Health check ...
 powershell -NoProfile -Command "try { $r = Invoke-WebRequest -Uri 'http://127.0.0.1:8000/admin/index.html' -UseBasicParsing -TimeoutSec 25; Write-Host ('  HTTP /admin/index.html = ' + $r.StatusCode) } catch { Write-Host '  HTTP check FAILED' }"
-powershell -NoProfile -Command "try { $x = Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/recommend' -Method Post -ContentType 'application/json' -Body '{\"algo\":\"demographic\",\"top\":3}'; Write-Host ('  API /api/recommend code = ' + $x.code) } catch { Write-Host '  API check FAILED' }"
+powershell -NoProfile -Command "try { $x = Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/wx/member/plans' -Method Post -ContentType 'application/json' -Body '{}'; Write-Host ('  API /api/wx/member/plans code = ' + $x.code) } catch { Write-Host '  API check FAILED' }"
 
 echo.
 echo ------------------------------------------------------------
