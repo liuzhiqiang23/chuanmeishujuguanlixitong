@@ -1,3 +1,6 @@
+-- 历史存档：旧库 vidio_mangage_db 的建表脚本（Navicat 导出）。
+-- 该库已于 2026-09-23 按作业要求迁移合并且删除；现系统唯一库为 movie_analytics_db
+-- （框架表已迁入其中），新项目表见同目录 movie_analytics_db.sql。
 /*
  Navicat Premium Data Transfer
 
