@@ -49,6 +49,12 @@ data/_git_orphans.txt
 # ---------- 换数据集作业新增（2026-09-20） ----------
 # Kaggle 原始下载件：credits.csv 190MB 超 GitHub 100MB 硬限制，且可随时重新下载
 data/new_source/
+# 本地数据备份、旧版推荐数据集与训练缓存，均可按项目脚本重新生成或下载
+data/backup_original/
+data/recommendation/tmdb_5000_credits.csv
+data/recommendation/tmdb_5000_movies.csv
+data/recommendation/personal/*.csv
+algorithm/prediction/model_cache/
 # 内网穿透二进制（52MB），可从官网重新下载
 tools/cloudflared.exe
 
