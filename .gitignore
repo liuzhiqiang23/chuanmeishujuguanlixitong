@@ -74,3 +74,7 @@ tools/tunnel.log
 tools/_consistency.jsonl
 
 sql/backup_vidio_mangage_db_20260922.sql
+
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
