@@ -39,3 +39,5 @@
 
   <view style="height:40rpx"></view>
 </view>
+
+<float-chat />

@@ -108,6 +108,10 @@ Page({
     wx.switchTab({ url: '/pages/member/member' });
   },
 
+  goChat() {
+    wx.navigateTo({ url: '/pages/chat/chat' });
+  },
+
   goIndex() {
     wx.switchTab({ url: '/pages/index/index' });
   },

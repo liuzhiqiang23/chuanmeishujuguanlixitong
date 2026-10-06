@@ -1,0 +1,52 @@
+<!-- AI 客服 -->
+<view class="page">
+  <!-- 对话区 -->
+  <scroll-view class="chat-list" scroll-y scroll-into-view="{{anchor}}" scroll-with-animation>
+    <!-- 欢迎语 -->
+    <view class="row-ai">
+      <view class="avatar ai">影</view>
+      <view class="bubble ai">
+        <text>你好，我是小影 🎬</text>
+        <text>影片、观影券、会员、优惠券的问题都可以问我。</text>
+      </view>
+    </view>
+
+    <block wx:for="{{messages}}" wx:key="id">
+      <!-- AI 消息 -->
+      <view class="row-ai" wx:if="{{item.role === 'ai'}}" id="m{{item.id}}">
+        <view class="avatar ai">影</view>
+        <view class="bubble ai">
+          <text user-select>{{item.text}}</text>
+          <view class="meta" wx:if="{{item.meta}}">{{item.meta}}</view>
+        </view>
+      </view>
+      <!-- 用户消息 -->
+      <view class="row-me" wx:else id="m{{item.id}}">
+        <view class="bubble me">
+          <text user-select>{{item.text}}</text>
+        </view>
+        <view class="avatar me">我</view>
+      </view>
+    </block>
+
+    <!-- 思考中 -->
+    <view class="row-ai" wx:if="{{thinking}}" id="thinking">
+      <view class="avatar ai">影</view>
+      <view class="bubble ai typing">小影查资料中…</view>
+    </view>
+    <view style="height:30rpx"></view>
+  </scroll-view>
+
+  <!-- 建议追问 -->
+  <scroll-view class="suggest" scroll-x wx:if="{{suggestions.length > 0 && !thinking}}">
+    <view class="chip" wx:for="{{suggestions}}" wx:key="*this" data-q="{{item}}" bindtap="onSuggest">{{item}}</view>
+  </scroll-view>
+
+  <!-- 输入区 -->
+  <view class="input-bar">
+    <input class="input" value="{{input}}" placeholder="问问影片、会员、优惠券…"
+           confirm-type="send" bindinput="onInput" bindconfirm="onSend"
+           maxlength="500" disabled="{{thinking}}" />
+    <view class="send {{(!input || thinking) ? 'send-off' : ''}}" bindtap="onSend">发送</view>
+  </view>
+</view>

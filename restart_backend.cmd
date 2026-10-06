@@ -51,8 +51,8 @@ if defined PID (
 echo.
 echo [2/4] Starting backend in background (log: _boot.log, JVM heap capped at 512m) ...
 rem application-dev.yml reads the DB password from env (sanitized repo); set it here.
-set "DB_PASSWORD=123456"
-start "" /MIN cmd /c "cd /d backend && set DB_PASSWORD=123456&& mvn -q -Dmaven.test.skip=true compile spring-boot:run -Dspring-boot.run.jvmArguments=-Xmx512m 1> ..\_boot.log 2>&1"
+if not defined DB_PASSWORD set "DB_PASSWORD=CHANGE_ME"
+start "" /MIN cmd /c "cd /d backend && set DB_PASSWORD=%DB_PASSWORD%&& mvn -q -Dmaven.test.skip=true compile spring-boot:run -Dspring-boot.run.jvmArguments=-Xmx512m 1> ..\_boot.log 2>&1"
 
 echo.
 echo [3/4] Waiting for port 8000 (max ~180s) ...

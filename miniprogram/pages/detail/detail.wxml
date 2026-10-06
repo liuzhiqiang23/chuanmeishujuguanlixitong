@@ -52,3 +52,5 @@
 </view>
 
 <view class="empty" wx:else>{{loading ? '加载中...' : err}}</view>
+
+<float-chat />

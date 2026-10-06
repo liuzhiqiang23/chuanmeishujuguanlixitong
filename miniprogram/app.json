@@ -6,7 +6,8 @@
     "pages/member/member",
     "pages/mine/mine",
     "pages/detail/detail",
-    "pages/confirm/confirm"
+    "pages/confirm/confirm",
+    "pages/chat/chat"
   ],
   "window": {
     "navigationBarTitleText": "电影票务演示",

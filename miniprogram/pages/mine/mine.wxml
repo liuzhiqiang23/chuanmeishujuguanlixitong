@@ -16,6 +16,17 @@
     </view>
   </view>
 
+  <!-- AI 客服入口 -->
+  <view class="card" bindtap="goChat">
+    <view class="row-between">
+      <view>
+        <view class="title">AI 客服小影</view>
+        <view class="muted">影片 / 观影券 / 会员 / 优惠券，随时问</view>
+      </view>
+      <text class="tag">在线</text>
+    </view>
+  </view>
+
   <!-- 管理员：靠后端白名单（wx.admin-open-ids）授予，前端只负责显示 -->
   <view class="card" wx:if="{{isAdmin}}">
     <view class="row-between">

@@ -22,6 +22,13 @@
 - [x] 第八步：一键启动 `start_all.cmd` + `用户手册.md`
 - **状态：** complete（提交号见 progress.md）
 
+### 阶段 2.5：AI 客服 —— **complete（2026-09-29）**
+- [x] t_chat_faq/t_chat_log 建表 + 10 条种子 FAQ
+- [x] 后端 /api/wx/chat（FAQ+影片检索 → GLM 生成 → FAQ 兜底；GLM_API_KEY 走 local_env.cmd）
+- [x] 小程序 pages/chat 聊天页 + 「我的」页入口
+- [x] 四题回归测试通过；提交 74b28185 已推送
+- **状态：** complete（FAQ 内容可随时在 t_chat_faq 表里增改，即时生效）
+
 ### 阶段 2：小程序 UI 迭代 —— **complete**
 - [x] 影片列表回到「小海报」布局（119a341d 之前那版），保留科幻配色
 - [x] 列表项底部三个文字（观影券/价格/删除）放大加亮

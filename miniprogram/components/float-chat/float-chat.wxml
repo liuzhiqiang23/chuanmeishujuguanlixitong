@@ -1,0 +1,5 @@
+<!-- 悬浮客服球：固定在右下角，点进 AI 客服小影 -->
+<view class="float-chat" bindtap="go">
+  <text class="float-chat-icon">💬</text>
+  <text class="float-chat-label">小影</text>
+</view>

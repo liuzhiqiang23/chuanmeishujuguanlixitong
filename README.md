@@ -1,6 +1,7 @@
 # movie-system
 
 #### 介绍
+> 📦 双平台同步：[Gitee](https://gitee.com/liu-zhiqiang20030520/liuzhiqiangdegit) ｜ [GitHub](https://github.com/liuzhiqiang23/chuanmeishujuguanlixitong)
 
 随着电影产业数字化发展，TMDB（电影数据库）与 MovieLens（电影评分网站）等平台积累了海量电影元数据与用户行为数据，而传统的人工运营推荐方式效率低、颗粒度粗，难以满足用户个性化观影需求。基于数据挖掘与机器学习的内容分析、票房预测与个性化推荐，已成为传媒数据应用的核心环节。
 本项目要求学生从零构建一套完整的电影数据分析与推荐系统，涵盖数据清洗、特征工程、EDA 可视化、票房预测建模、个性化推荐算法、后端 API、前端界面与数据库设计，并实现 Java 后端与 Python 算法引擎的跨语言调用，模拟企业级开发全流程。

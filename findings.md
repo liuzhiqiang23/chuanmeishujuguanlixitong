@@ -2,7 +2,7 @@
 
 > 本文件记录**核查得到的事实与原文引用**（含后台页面文字、官方文档/媒体报道结论）。
 > 外部来源内容一律只写在这里，不写进 `task_plan.md`。
-> 记录时间：[redacted-number]（除标注外均为当天在微信后台实测所见）
+> 记录时间：2026-09-23（除标注外均为当天在微信后台实测所见）
 
 ## 1. 小程序账号事实（微信后台实测）
 
@@ -15,8 +15,8 @@
 | 微信认证 | **未认证**（认证主体类型：未认证） | 设置 → 基本设置、管理 → 微信认证 |
 | 小程序备案 | **管局审核中**（短信核验已完成） | 首页「小程序开发与发布流程」 |
 | 线上版本 | 尚未提交线上版本 | 管理 → 版本管理 |
-| 审核版本 | 1.0.4 → **审核不通过**（[redacted-number]:31:58 提交） | 管理 → 版本管理 |
-| 开发版本 | **[redacted-number]**（[redacted-number]:27:38 提交，已挂「体验版」标签） | 管理 → 版本管理 |
+| 审核版本 | 1.0.4 → **审核不通过**（2026-09-22 14:31:58 提交） | 管理 → 版本管理 |
+| 开发版本 | **20260923**（2026-09-23 20:27:38 提交，已挂「体验版」标签） | 管理 → 版本管理 |
 | 开发者 | SICKLE | 版本管理 |
 
 ## 2. 虚拟支付开通条件页（后台原文逐字）
@@ -41,12 +41,12 @@
 | 账号形态 | 该行显示 | 来源 |
 |---|---|---|
 | 企业账号 | 小程序类型符合要求（**企业事业单位**），另两项「已认证/完备」 | 第三方部署文档站转贴的后台截图 |
-| 个人认证账号 | 小程序类型符合要求（**个人**），另两项「已认证/完备」 | [redacted-number] 帖子《好消息，个人认证小程序可以接入支付功能了》 |
+| 个人认证账号 | 小程序类型符合要求（**个人**），另两项「已认证/完备」 | 2026-09-02 帖子《好消息，个人认证小程序可以接入支付功能了》 |
 
 → 推断：该行是按账号类型渲染的**当前值**，不是「只允许企业」的硬要求。
 → **未解矛盾**：本账号主体是「个人」，这页却显示「企业事业单位」；页面自己又承认「主体信息完备（缺陷）」。可能原因：①主体信息未补齐导致类型字段取不到真实值；②该模块只对企业/个体户开放，个人通道另有入口。**认证完成后必须复验**。
 
-## [redacted-number] 版本审核驳回原文（后台「查看详情」页逐字）
+## 3. 1.0.4 版本审核驳回原文（后台「查看详情」页逐字）
 
 ```
 版本审核修改指引
@@ -123,7 +123,7 @@
 
 | 现象 | 原因/解法 |
 |---|---|
-| `git push github` → `Connection reset ... port 22` | 该网络重置 22 端口；remote 已改为 `ssh://[redacted-email]:443/liuzhiqiang23/chuanmeishujuguanlixitong.git`（正确仓库名是 `liuzhiqiang23`，**无连字符**） |
+| `git push github` → `Connection reset ... port 22` | 该网络重置 22 端口；remote 已改为 `ssh://git@ssh.github.com:443/liuzhiqiang23/chuanmeishujuguanlixitong.git`（正确仓库名是 `liuzhiqiang23`，**无连字符**） |
 | TMDB 海报全显示「无海报」 | `image.tmdb.org` 被重置（主站可达）；环境问题，非代码缺陷 |
 | `*.cmd` 报「'-' 不是内部或外部命令」 | 批处理必须**纯 ASCII + CRLF**，不要 `chcp 65001` |
 | 脚本等待逻辑失效 | `timeout /t` 在 stdin 被重定向时不等待，用 `ping -n` |
@@ -134,3 +134,24 @@
 - `local_env.cmd`（DB 口令 + RSA 密钥对）**永不入库、永不外发**；`data/tmdb_key.txt`、`data/new_source/`、`cloudflared.exe`、模型二进制、推荐缓存均已在 `.gitignore`
 - `.claude/`、`.vscode/` 是本地 AI/编辑器配置，**不要删除**
 - 涉及微信账号的操作（认证、扫码验证、开通虚拟支付、提交审核）**只查看不代操作**，一律由用户本人执行
+
+## 小程序 AI 客服（2026-09-29，RAG 路线上线）
+- 动机：用户问"给 movie-system 做个私有知识客服怎么实现"，确认后全程实施
+- 架构：小程序 chat 页 → POST /api/wx/chat → 后端三步（FAQ 检索 + 影片检索 → 拼 prompt 调 GLM → 兜底）→ 回答
+- 私有知识 = t_chat_faq（运营规则，10 条种子：会员/券/订单/平台/影片）+ t_video_info（中文名影片库）
+- GLM：glm-4-flash（免费），key = GLM_API_KEY 环境变量（local_env.cmd 注入，gitignored，与 ai-video-pipeline 共用同一个智谱 key）
+- 检索设计：FAQ 按「命中关键词字数」计分（避免泛词挤掉精准条目）；影片检索用现成 searchByKeyword + n-gram 降级（对付"帮我流浪地球"虚词黏片名）
+- 兜底链：无 key/调用失败 → FAQ 直接命中回标准答案；否则固定话术。source 字段区分 glm/faq/failed
+- 关键坑：**t_movie 存英文名（Interstellar），中文名在 t_video_info（小程序展示同源表）——客服必须查 t_video_info**；VideoInfoMapper 是自定义 MediaBaseMapper 没有 selectList(QueryWrapper)，用其 searchByKeyword；Git Bash curl 发中文会 GBK 乱码，测试要用 UTF-8 文件体 + charset=utf-8 头
+- 测试（2026-09-29）：会员价格题引用 FAQ#1 出准确 15/40/128；「星际穿越」引用库内数据（评分8.487/169min/6.8亿美元）；天气题正确拒答拉回；接口耗时 1.3~5s
+- 提交 74b28185 已推送 gitee
+- 跨会话入口：本功能完整记忆已存为技能 `C:\Users\Lenovo\.zcode\skills\miniprogram-ai-support\SKILL.md`（架构/代码位置/设计决策/运维/坑），其他对话可直接读
+
+## GitHub 净化复核（2026-10-06 晚，ZCode 会话）
+- 背景：用户让 Codex 扫描 GitHub 项目漏洞并修复，当晚 22:03~22:26 Codex 强推了 4 个仓库：chuanmeishujuguanlixitong（本仓库 GitHub 端）、poet-kgqa（诗词问答）、gif-sticker-maker-free、artificial-intelligent-created-system。ZCode 逐项复核本仓库结论如下。
+- **GitHub 端被整段重建**：28 个净化提交，与本地历史无共同祖先（fetch 显示 forced update）。复核通过项：data/backup_original/*.csv、sql/backup_vidio_mangage_db_20260922.sql、tools/tunnel_url.txt、前端 .env 均未进新历史；HEAD 的 data/sync_tmdb.py 无硬编码 key；sql/*.sql 均为建表+优惠券种子，无口令无用户数据。
+- **残留（低危，Codex 报告与实际有小出入）**：净化 HEAD 仍有 `sql/backup/t_user_before_wx_shop.sql`（纯表结构 0 INSERT）与 `tools/tunnel.cmd`、`tools/tunnel_bench.py`、`tools/tunnel_bench2.py`（无内嵌 token）——「清理数据库备份」的说法不完全准确，但不泄密。
+- **净化快照基线偏旧**：GitHub 版没有 9-29 之后的 AI 客服（miniprogram/pages 无 chat 页、无 t_chat_faq 相关文件），比 Gitee/本地旧一截。Codex 自认未跑测试；本地工作区未被动过，项目运行不受影响。
+- **Gitee（origin=liuzhiqiangdegit，公开、HTTP 200 可访问）仍是完整旧脏历史**：CSV 备份、全库 sql 备份、tunnel_url.txt、历史中的 TMDB key/DB 凭据全部还在——这是当前真实的持续泄漏点，比 GitHub 端要紧得多。
+- **凭据未轮换**：TMDB API Key、DB 凭据在 GitHub 新历史里抹掉了，但旧值仍有效（Codex 无权限撤销）。TMDB 去 themoviedb.org 设置→API 重新生成；DB 口令云端服务器+本地一起换。
+- **操作红线（所有会话必读）**：本地 master 与 github/master 无共同祖先。严禁向 GitHub 端 push（任何形式，含 mirror/tags）——会把脏历史重新推上去并覆盖净化版。Gitee 在决定清洗方案前也别再推。本地 3 个未推送提交（04780d39/f6e69efa/92be9d2e，客服治胡说+记忆）内容干净，将来用 cherry-pick 搬到 github/master 之上，不要 rebase 整条旧历史。
