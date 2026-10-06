@@ -2,17 +2,17 @@
 #
 #   1) make sure the backend is listening on port 8000 (start it if it is down)
 #   2) start the cloudflared quick tunnel via tools\tunnel.cmd
-#   3) read the public URL out of tools\tunnel.log and write it into miniprogram\app.js
-#   4) print the next steps
+#   3) save the temporary public URL in the ignored tools\tunnel_url.txt file
+#   4) print the next steps without exposing the URL in console logs
 #
 # Pure ASCII on purpose: PowerShell 5.1 and cmd.exe mis-parse non-ASCII script files.
 
 $ErrorActionPreference = 'Continue'
 
-$Root  = 'D:\movie-system'
+$Root  = Split-Path -Parent $PSScriptRoot
 $Tools = Join-Path $Root 'tools'
-$AppJs = Join-Path $Root 'miniprogram\app.js'
 $TLog  = Join-Path $Tools 'tunnel.log'
+$UrlFile = Join-Path $Tools 'tunnel_url.txt'
 
 function Test-Port([int]$Port) {
     try {
@@ -53,10 +53,6 @@ if (Test-Port 8000) {
 # provisioning leaves you with no tunnel at all (hit exactly this on 2026-09-18).
 Write-Host '[2/3] starting cloudflared tunnel ...'
 $oldProcs = @(Get-Process cloudflared -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Id)
-$oldUrl = ''
-$m = [Regex]::Match((Get-Content $AppJs -Raw -Encoding UTF8), 'https://[a-z0-9-]+\.trycloudflare\.com')
-if ($m.Success) { $oldUrl = $m.Value }
-
 if (Test-Path $TLog) { Remove-Item $TLog -Force -ErrorAction SilentlyContinue }
 Start-Process -FilePath 'cmd.exe' -ArgumentList '/c', 'tunnel.cmd' -WorkingDirectory $Tools -WindowStyle Minimized
 
@@ -66,7 +62,7 @@ for ($i = 0; $i -lt 60; $i++) {
     if (Test-Path $TLog) {
         $hit = Select-String -Path $TLog -Pattern 'https://[a-z0-9-]+\.trycloudflare\.com' -AllMatches |
                ForEach-Object { $_.Matches } | ForEach-Object { $_.Value } |
-               Where-Object { $_ -notmatch 'api\.trycloudflare\.com' -and $_ -ne $oldUrl } |
+               Where-Object { $_ -notmatch 'api\.trycloudflare\.com' } |
                Select-Object -First 1
         if ($hit) { $url = $hit; break }
     }
@@ -80,57 +76,23 @@ if (-not $url) {
 foreach ($p in $oldProcs) {
     Stop-Process -Id $p -Force -ErrorAction SilentlyContinue
 }
-Write-Host ('      tunnel ready: ' + $url)
-
-# --- 3) point the mini program at it ---------------------------------------
-$src = Get-Content $AppJs -Raw -Encoding UTF8
-
-# LAN address: the interface that actually has the default route (the phone
-# hotspot hands out a new one every so often, so never hardcode it).
-$lanIp = $null
-$conf = Get-NetIPConfiguration | Where-Object { $_.IPv4DefaultGateway -ne $null } | Select-Object -First 1
-if ($conf) {
-    $lanIp = ($conf.IPv4Address | Select-Object -First 1).IPAddress
-}
-
-$changed = $false
-if ($lanIp) {
-    $newSrc = [Regex]::Replace($src, 'http://(?!127\.0\.0\.1)\d+\.\d+\.\d+\.\d+:8000', 'http://' + $lanIp + ':8000')
-    if ($newSrc -ne $src) { $changed = $true; $src = $newSrc }
-    Write-Host ('[3/3] LAN address set to ' + $lanIp)
-}
-
-$found = [Regex]::Match($src, 'https://[a-z0-9-]+\.trycloudflare\.com')
-if (-not $found.Success) {
-    Write-Host '      [WARN] no trycloudflare URL found in app.js - edit API_BASES by hand' -ForegroundColor Yellow
-} elseif ($found.Value -ne $url) {
-    $src = [Regex]::Replace($src, 'https://[a-z0-9-]+\.trycloudflare\.com', $url)
-    $changed = $true
-    Write-Host ('      tunnel address updated: ' + $found.Value)
-}
-
-if ($changed) {
-    [IO.File]::WriteAllText($AppJs, $src, (New-Object Text.UTF8Encoding($false)))
-    Write-Host '      app.js written - press Ctrl+B in DevTools to pick it up'
-} else {
-    Write-Host '      app.js already up to date'
-}
+ [IO.File]::WriteAllText($UrlFile, $url + [Environment]::NewLine, (New-Object Text.UTF8Encoding($false)))
+Write-Host '[3/3] temporary URL saved in tools\tunnel_url.txt (ignored by Git)'
 
 # --- done -------------------------------------------------------------------
 Write-Host ''
 Write-Host '------------------------------------------------------------'
 Write-Host ' Next steps'
-Write-Host '   1. WeChat DevTools -> press Ctrl+B to rebuild'
-Write-Host '   2. Click "Preview", then send the QR code to your classmate'
-Write-Host '   3. Classmate scans it - the mini program now reaches this PC'
+Write-Host '   1. For a temporary preview, configure the local Mini Program API base in DevTools.'
+Write-Host '      Read it from tools\tunnel_url.txt; do not commit it into app.js.'
+Write-Host '   2. Rebuild and preview in WeChat DevTools.'
 Write-Host ''
 Write-Host ' Keep in mind'
 Write-Host '   - The public URL changes every time the tunnel restarts.'
-Write-Host '     Re-run this script (it rewrites app.js), then Ctrl+B again.'
+Write-Host '     Re-run this script and update the local DevTools API base.'
 Write-Host '   - Speed is limited by the phone hotspot and by Cloudflare'
 Write-Host '     routing this line to the US (about 260 ms round trip).'
 Write-Host '     Movie posters can take several seconds to show up.'
-Write-Host '   - Stay on 127.0.0.1 / the LAN IP while you develop; app.js'
-Write-Host '     probes all three addresses and picks the fastest reachable one.'
+Write-Host '   - Keep the tunnel URL out of tracked source and issue comments.'
 Write-Host '------------------------------------------------------------'
 Write-Host ''

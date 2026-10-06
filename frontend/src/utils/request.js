@@ -2,6 +2,27 @@ import axios from 'axios'
 import { ElLoading, ElMessage } from 'element-plus'
 import { router } from '@/router'
 
+let csrfTokenPromise
+
+const getCsrfToken = () => {
+  if (!csrfTokenPromise) {
+    csrfTokenPromise = axios.get(`${import.meta.env.VITE_APP_URL}/api/csrf`, {
+      withCredentials: true,
+      timeout: 30000
+    }).then(res => res.data.token).catch(error => {
+      csrfTokenPromise = undefined
+      throw error
+    })
+  }
+  return csrfTokenPromise
+}
+
+const withCsrfToken = async query => {
+  const token = await getCsrfToken()
+  query.headers = { ...query.headers, 'X-XSRF-TOKEN': token }
+  return query
+}
+
 const request = function (loadtip, query) {
   let loading
   if (loadtip) {
@@ -50,7 +71,7 @@ const post = function (url, params) {
     data: params,
     headers: { 'Content-Type': 'application/json', 'request-ajax': true }
   }
-  return request(false, query)
+  return withCsrfToken(query).then(securedQuery => request(false, securedQuery))
 }
 
 const postWithLoadTip = function (url, params) {
@@ -63,7 +84,7 @@ const postWithLoadTip = function (url, params) {
     data: params,
     headers: { 'Content-Type': 'application/json', 'request-ajax': true }
   }
-  return request(true, query)
+  return withCsrfToken(query).then(securedQuery => request(true, securedQuery))
 }
 
 const postWithOutLoadTip = function (url, params) {
@@ -76,7 +97,7 @@ const postWithOutLoadTip = function (url, params) {
     data: params,
     headers: { 'Content-Type': 'application/json', 'request-ajax': true }
   }
-  return request(false, query)
+  return withCsrfToken(query).then(securedQuery => request(false, securedQuery))
 }
 
 const get = function (url, params) {
@@ -102,7 +123,7 @@ const form = function (url, params) {
     data: params,
     headers: { 'Content-Type': 'multipart/form-data', 'request-ajax': true }
   }
-  return request(false, query)
+  return withCsrfToken(query).then(securedQuery => request(false, securedQuery))
 }
 
 export {

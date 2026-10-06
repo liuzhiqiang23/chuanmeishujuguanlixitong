@@ -6,21 +6,27 @@ import com.alvis.media.domain.enums.RoleEnum;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.Customizer;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.util.StringUtils;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 
 /**
@@ -66,26 +72,38 @@ public class SecurityConfigurer {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    AuthenticationManager authenticationManager,
-                                                   RestLoginAuthenticationFilter authenticationFilter) throws Exception {
-        http.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
+                                                   RestLoginAuthenticationFilter authenticationFilter,
+                                                   @Value("${app.cors.allowed-origins:}") String allowedOrigins,
+                                                   @Value("${app.security.remember-me-key:}") String rememberMeKey) throws Exception {
+        http.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));
 
         List<String> securityIgnoreUrls = systemConfig.getSecurityIgnoreUrls();
         String[] ignores = securityIgnoreUrls.toArray(new String[0]);
 
         http
-                .csrf(csrf -> csrf.disable())
+                .csrf(csrf -> csrf
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                        .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
+                        .ignoringRequestMatchers("/api/wx/**", "/api/admin/upload/**"))
                 .cors(Customizer.withDefaults())
                 .authenticationManager(authenticationManager)
+                .addFilterBefore(new RequestOriginFilter(allowedOrigins), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(authenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(restAuthenticationEntryPoint)
                         .accessDeniedHandler(restAccessDeniedHandler))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(ignores).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/admin/upload/configAndUpload").hasRole(RoleEnum.ADMIN.getName())
                         .requestMatchers("/api/admin/**").hasRole(RoleEnum.ADMIN.getName())
                         .requestMatchers("/video/**").hasRole(RoleEnum.ADMIN.getName())
+                        .requestMatchers("/api/student/user/register").permitAll()
                         .requestMatchers("/api/student/**").hasRole(RoleEnum.VIP.getName())
-                        .anyRequest().permitAll())
+                        .requestMatchers(ignores).permitAll()
+                        .requestMatchers("/api/csrf", "/api/user/login", "/api/wx/**",
+                                "/api/movie/**", "/api/predict/**", "/api/recommend/**",
+                                "/", "/admin", "/admin/**", "/assets/**", "/css/**",
+                                "/js/**", "/images/**", "/static/**", "/error", "/favicon.ico").permitAll()
+                        .anyRequest().authenticated())
                 .formLogin(form -> form
                         .successHandler(restAuthenticationSuccessHandler)
                         .failureHandler(restAuthenticationFailureHandler))
@@ -94,7 +112,7 @@ public class SecurityConfigurer {
                         .logoutSuccessHandler(restLogoutSuccessHandler)
                         .invalidateHttpSession(true))
                 .rememberMe(remember -> remember
-                        .key(CookieConfig.getName())
+                        .key(StringUtils.hasText(rememberMeKey) ? rememberMeKey : UUID.randomUUID().toString())
                         .tokenValiditySeconds(CookieConfig.getInterval())
                         .userDetailsService(formDetailsService));
 
@@ -102,13 +120,16 @@ public class SecurityConfigurer {
     }
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+    public CorsConfigurationSource corsConfigurationSource(
+            @Value("${app.cors.allowed-origins:}") String allowedOrigins) {
         final CorsConfiguration configuration = new CorsConfiguration();
         configuration.setMaxAge(3600L);
-        configuration.setAllowedOriginPatterns(Collections.singletonList("*"));
-        configuration.setAllowedMethods(Collections.singletonList("*"));
+        configuration.setAllowedOrigins(Arrays.stream(allowedOrigins.split(","))
+                .map(String::trim).filter(origin -> !origin.isEmpty()).toList());
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"));
         configuration.setAllowCredentials(true);
-        configuration.setAllowedHeaders(Collections.singletonList("*"));
+        configuration.setAllowedHeaders(List.of("Content-Type", "X-XSRF-TOKEN", "request-ajax",
+                "Authorization", "X-Requested-With"));
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/api/**", configuration);
         return source;

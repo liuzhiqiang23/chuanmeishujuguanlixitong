@@ -8,8 +8,8 @@ import com.alvis.media.service.FileUpload;
 import com.alvis.media.service.UserService;
 import com.alvis.media.viewmodel.admin.file.UeditorConfigVM;
 import com.alvis.media.viewmodel.admin.file.UploadResultVM;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
@@ -25,10 +25,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.Set;
 
 
 @Slf4j
-@AllArgsConstructor
 @RequestMapping("/api/admin/upload")
 @RestController("AdminUploadController")
 public class UploadController extends BaseApiController {
@@ -39,6 +39,15 @@ public class UploadController extends BaseApiController {
     private static final String IMAGE_UPLOAD = "imgUpload";
     private static final String IMAGE_UPLOAD_FILE = "upFile";
     private final UserService userService;
+    private final String videoUploadDirectory;
+
+    public UploadController(FileUpload fileUpload, SystemConfig systemConfig, UserService userService,
+                            @Value("${app.upload.video-directory:./data/videos}") String videoUploadDirectory) {
+        this.fileUpload = fileUpload;
+        this.systemConfig = systemConfig;
+        this.userService = userService;
+        this.videoUploadDirectory = videoUploadDirectory;
+    }
 
     @ResponseBody
     @RequestMapping("/configAndUpload")
@@ -106,21 +115,30 @@ public class UploadController extends BaseApiController {
     }
 
     //实现接收的方法
-    @CrossOrigin
     @PostMapping(value = "/uploadVidoe")
     @ResponseBody
-    public Map <String,String> savaVideo(@RequestParam("file") MultipartFile file, @RequestParam String SavePath)
+    public Map <String,String> savaVideo(@RequestParam("file") MultipartFile file)
             throws IllegalStateException {
         Map<String,String> resultMap = new HashMap <>();
         try{
-            //获取文件后缀，因此此后端代码可接收一切文件，上传格式前端限定
-            String fileExt = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".") + 1)
-                    .toLowerCase();
+            String originalName = file.getOriginalFilename();
+            if (file.isEmpty() || file.getSize() > 300L * 1024 * 1024 || originalName == null
+                    || !originalName.contains(".")) {
+                return Map.of("resCode", "400");
+            }
+            String fileExt = originalName.substring(originalName.lastIndexOf('.') + 1).toLowerCase();
+            if (!Set.of("mp4", "flv", "avi", "ogg", "wmv", "rmvb").contains(fileExt)) {
+                return Map.of("resCode", "400");
+            }
             // 重构文件名称
             String pikId = UUID.randomUUID().toString().replaceAll("-", "");
             String newVidoeName = pikId + "." + fileExt;
             //保存视频
-            File fileSave = new File(SavePath, newVidoeName);
+            File root = new File(videoUploadDirectory).getCanonicalFile();
+            File fileSave = new File(root, newVidoeName).getCanonicalFile();
+            if (!fileSave.toPath().startsWith(root.toPath())) {
+                return Map.of("resCode", "400");
+            }
             // 目录不存在时自动创建，否则 transferTo 会报“系统找不到指定的路径”导致上传失败
             File parentDir = fileSave.getParentFile();
             if (parentDir != null && !parentDir.exists()) {
@@ -133,12 +151,12 @@ public class UploadController extends BaseApiController {
             //正确保存视频则设置返回码为200
             resultMap.put("resCode","200");
             //返回视频保存路径
-            resultMap.put("VideoUrl",SavePath + "/" + newVidoeName);
+            resultMap.put("VideoUrl",fileSave.getPath());
             return  resultMap;
 
         }catch (Exception e){
 
-            logger.error("视频上传失败, SavePath={}, 文件名={}", SavePath, file.getOriginalFilename(), e);
+            logger.error("Video upload failed", e);
             //保存视频错误则设置返回码为400
             resultMap.put("resCode","400");
             return  resultMap ;

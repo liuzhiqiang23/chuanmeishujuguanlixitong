@@ -9,6 +9,16 @@ server:
     enabled: true
     min-response-size: 1
 
+app:
+  cors:
+    # Add the exact browser origins used by the frontend, separated by commas.
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
+  security:
+    # Set a stable random value in production so remember-me cookies survive restarts.
+    remember-me-key: ${REMEMBER_ME_KEY:}
+  upload:
+    video-directory: ${VIDEO_UPLOAD_DIR:./data/videos}
+
 #logging logback
 logging:
   config: classpath:logback-spring.xml
@@ -40,10 +50,7 @@ mybatis-plus:
 system:
   security-ignore-urls:
     - /api/wx/**
-    - /api/admin/upload/configAndUpload
-    - /api/admin/upload/auth
     - /api/student/user/register
-    - /api/admin/video/**
   pwdKey:
     # 登录密码用这对 RSA 密钥加解密，必须用环境变量注入，不要提交进 git。
     # 生成：openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out priv.pem
@@ -89,9 +96,9 @@ spring:
   servlet:
     multipart:
       # 文件最大限制
-      max-file-size: 1024MB
+      max-file-size: 300MB
       # 请求最大限制
-      max-request-size: 1024MB
+      max-request-size: 310MB
       enabled: true
       # 设置文件缓存的临界点,超过则先保存到临时目录,默认为0,所有文件都会进行缓存
       file-size-threshold: 0

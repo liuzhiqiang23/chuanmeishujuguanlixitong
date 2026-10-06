@@ -6,7 +6,6 @@
       action="/api/admin/upload/uploadVidoe"
       multiple
       :show-file-list="false"
-      :data="{SavePath: this.Path.url}"
       :on-success="handleVideoSuccess"
       :before-upload="beforeUploadVideo"
       :on-progress="uploadVideoProcess">
@@ -74,9 +73,6 @@ export default {
       },
       videoFlag: false,
       Plus: true,
-      Path: {
-        url: 'D:/video/videoUpload'
-      },
       videoUploadPercent: 0
     }
   },
