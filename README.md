@@ -1,5 +1,7 @@
 # movie-system
 
+**[English](./README.en.md) | 中文**
+
 #### 介绍
 > 📦 双平台同步：[Gitee](https://gitee.com/liu-zhiqiang20030520/liuzhiqiangdegit) ｜ [GitHub](https://github.com/liuzhiqiang23/chuanmeishujuguanlixitong)
 
