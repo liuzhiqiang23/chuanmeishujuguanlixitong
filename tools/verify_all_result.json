@@ -71,7 +71,7 @@
       "http": 200,
       "code": 1,
       "pass": true,
-      "evidence": "最优=RandomForest 随机森林 RMSE=0.8750 R2=0.5910 训练/验证=4000/1000 特征=34 耗时=0.01s",
+      "evidence": "最优=RandomForest 随机森林 RMSE=0.8750 R2=0.5910 训练/验证=4000/1000 特征=34 耗时=0.02s",
       "message": "成功"
     },
     {
@@ -80,7 +80,7 @@
       "http": 200,
       "code": 1,
       "pass": true,
-      "evidence": "日志总数=79 最新=2026-09-23T12:07:09.000+00:00 Silent Youth(RandomForest 随机森林)",
+      "evidence": "日志总数=166 最新=2026-10-22T06:36:44.000+00:00 Chup Chup Ke(RandomForest 随机森林)",
       "message": "成功"
     },
     {
@@ -89,7 +89,7 @@
       "http": 200,
       "code": 1,
       "pass": true,
-      "evidence": "种子=Toy Story Top1=Toy Story 2 相似度=89.09% 耗时=0.06s 理由=同类型：Animation、Comedy、Family；同导演：John Lasseter",
+      "evidence": "种子=Toy Story Top1=Toy Story 2 相似度=89.09% 耗时=0.17s 理由=同类型：Animation、Comedy、Family；同导演：John Lasseter",
       "message": "成功"
     },
     {
@@ -98,7 +98,7 @@
       "http": 200,
       "code": 1,
       "pass": true,
-      "evidence": "Top3=['Minions', 'Big Hero 6', 'Captain Underpants: The First Epic Movie'] 耗时=0.06s",
+      "evidence": "Top3=['Minions', 'Big Hero 6', 'Captain Underpants: The First Epic Movie'] 耗时=0.11s",
       "message": "成功"
     },
     {
@@ -116,7 +116,7 @@
       "http": 200,
       "code": 1,
       "pass": true,
-      "evidence": "预测=20 条，落库=20 条，用时 2.81s（含起进程）；预测均值=589597 美元，区间 455~3676181",
+      "evidence": "预测=20 条，落库=20 条，用时 8.2s（含起进程）；预测均值=589597 美元，区间 455~3676181",
       "message": "成功"
     },
     {

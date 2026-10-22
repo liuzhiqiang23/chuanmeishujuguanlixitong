@@ -10,14 +10,9 @@
           <el-option v-for="item in categoryEnum" :key="item.key" :value="item.key" :label="item.value"></el-option>
         </el-select>
       </el-form-item>
-      <el-form-item :key="index" :label="'视频标签'+(index+1)+'：'" required v-for="(titleItem,index) in form.videoTagList">
-        <el-input v-model="titleItem.tagName" style="width: 80%"/>
-        <el-button type="text" class="link-left" size="small" @click="form.videoTagList.splice(index,1)">删除</el-button>
-      </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="submitForm">提交</el-button>
         <el-button @click="resetForm">重置</el-button>
-        <el-button type="success" @click="addTitle">添加标签</el-button>
       </el-form-item>
     </el-form>
   </div>
@@ -34,8 +29,7 @@ export default {
         videoId: null,
         videoCategory: null,
         videoUrl: '',
-        videoName: '',
-        videoTagList: []
+        videoName: ''
       },
       formLoading: false,
       rules: {
@@ -79,14 +73,6 @@ export default {
           return false
         }
       })
-    },
-    addTitle () {
-      this.form.videoTagList.push({
-        userTag: ''
-      })
-    },
-    removeTitleItem (titleItem) {
-      this.form.videoTagList.remove(titleItem)
     },
     resetForm () {
       this.$refs['form'].resetFields()

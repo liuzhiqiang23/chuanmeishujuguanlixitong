@@ -2,20 +2,21 @@
 """
 第七步 联调验收脚本：一次性跑通「前端 → 后端 → 算法」全部接口。
 
-用法（后端已启动在 8000 端口）：
+用法（后端已启动在 8000 端口，先设置 MOVIE_ADMIN_USER/MOVIE_ADMIN_PASS）：
     .venv\\Scripts\\python.exe tools/verify_all.py
 
 输出：逐项 PASS/FAIL 的验收表 + 关键证据，可直接贴进《系统联调与测试记录》。
 """
 import json
+import os
 import sys
 import time
 
 import requests
 
 BASE = "http://127.0.0.1:8000"
-ADMIN_USER = "柳志强"
-ADMIN_PASS = "200306"
+ADMIN_USER = os.environ.get("MOVIE_ADMIN_USER")
+ADMIN_PASS = os.environ.get("MOVIE_ADMIN_PASS")
 
 results = []
 
@@ -51,6 +52,9 @@ def check(name, method, path, resp, ok_extra=None, evidence=None, expect_code=1)
 
 
 def main():
+    if not ADMIN_USER or not ADMIN_PASS:
+        print("Set MOVIE_ADMIN_USER and MOVIE_ADMIN_PASS before running this check.")
+        return 2
     s = requests.Session()
     s.headers.update({"Content-Type": "application/json", "request-ajax": "true"})
 
@@ -227,7 +231,7 @@ def main():
     for i, x in enumerate(results, 1):
         print("| %d | %s | `%s` | %s | %s | %s | %s |"
               % (i, x["name"], x["call"], x["http"], x["code"],
-                 "✅" if x["pass"] else "❌", x["evidence"]))
+                 "PASS" if x["pass"] else "FAIL", x["evidence"]))
 
     with open("tools/verify_all_result.json", "w", encoding="utf-8") as f:
         json.dump({"passed": ok, "total": len(results), "items": results},

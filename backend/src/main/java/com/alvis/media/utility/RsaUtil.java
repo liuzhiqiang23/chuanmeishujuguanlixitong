@@ -38,7 +38,7 @@ public class RsaUtil {
             byte[] cipherBytes = cipher.doFinal(text.getBytes(CHAR_SET));
             return baseByteToStr(cipherBytes);
         } catch (Exception e) {
-            logger.error("publicCertificate:{}  \r\n  text:{}", publicCertificate, text, e);
+            logger.error("RSA password encryption failed", e);
         }
         return null;
     }
@@ -59,7 +59,7 @@ public class RsaUtil {
             cipherText = cipher.doFinal(textbyte);
             return new String(cipherText, CHAR_SET);
         } catch (Exception e) {
-            logger.error("privateCertificate:{}  \r\n  text:{}", privateCertificate, text, e);
+            logger.error("RSA password decryption failed", e);
         }
         return null;
     }

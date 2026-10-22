@@ -43,7 +43,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             return false;
         }
         String pwd = pwdDecode(encodePwd);
-        return pwd.equals(password);
+        return password != null && password.equals(pwd);
     }
 
     @Override

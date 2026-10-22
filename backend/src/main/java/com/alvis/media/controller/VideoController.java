@@ -5,6 +5,7 @@ import com.alvis.media.base.NonStaticResourceHttpRequestHandler;
 import com.alvis.media.base.RestResponse;
 import com.alvis.media.domain.*;
 import com.alvis.media.service.VideoInfoService;
+import com.alvis.media.service.DiscoverService;
 import com.alvis.media.utility.PageInfoHelper;
 import com.alvis.media.viewmodel.video.*;
 import com.github.pagehelper.PageInfo;
@@ -22,6 +23,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Date;
 
 //导包
 
@@ -32,6 +34,7 @@ import java.util.List;
 public class VideoController  extends BaseApiController {
 
     private  final VideoInfoService videoInfoService;
+    private final DiscoverService discoverService;
 
     @Autowired
     private NonStaticResourceHttpRequestHandler nonStaticResourceHttpRequestHandler;
@@ -78,6 +81,8 @@ public class VideoController  extends BaseApiController {
         VideoDetailVM vm = new VideoDetailVM();
         vm.setVideoId(video.getVideoId());
         vm.setVideoName(video.getVideoName());
+        vm.setVideoCategory(video.getVideoCategory());
+        vm.setVideoUrl(video.getVideoUrl());
         vm.setOriginalTitle(video.getOriginalTitle());
         vm.setOverview(video.getOverview());
         vm.setTagline(video.getTagline());
@@ -118,18 +123,29 @@ public class VideoController  extends BaseApiController {
 
     @RequestMapping(value = "/edit", method = RequestMethod.POST)
     public RestResponse<VideoResponseVM> editVideo(@RequestBody @Valid VideoCreateVM model) {
-        //step1 校验视频是否上传 （判断url是否为空）
-        if(StringUtils.isBlank(model.getVideoUrl()))
-        {
-            return RestResponse.fail(500,"视频文件未上传");
+        if (model.getVideoId() == null || StringUtils.isBlank(model.getVideoName()) || model.getVideoCategory() == null) {
+            return RestResponse.fail(400, "请填写视频名称和分类");
         }
-
-
+        VideoInfo video = new VideoInfo();
+        video.setVideoId(model.getVideoId());
+        video.setVideoName(model.getVideoName());
+        video.setVideoCategory(model.getVideoCategory());
+        video.setLastModifyTime(new Date());
+        if (StringUtils.isNotBlank(model.getVideoUrl())) {
+            video.setVideoUrl(model.getVideoUrl());
+        }
+        if (videoInfoService.updateByIdFilter(video) == 0) {
+            return RestResponse.fail(404, "视频不存在");
+        }
         return RestResponse.ok();
     }
 
     @RequestMapping(value = "/delete/{id}", method = RequestMethod.POST)
     public RestResponse delete(@PathVariable Integer id) {
+        if (videoInfoService.selectById(id) == null) {
+            return RestResponse.fail(404, "视频不存在");
+        }
+        discoverService.deleteVideo(id);
         return RestResponse.ok();
     }
 

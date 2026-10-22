@@ -10,6 +10,8 @@ import java.util.List;
 public class VideoDetailVM {
     private Integer videoId;
     private String videoName;
+    private Integer videoCategory;
+    private String videoUrl;
     private String originalTitle;
     private String overview;
     private String tagline;

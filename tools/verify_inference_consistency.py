@@ -60,9 +60,9 @@ def main():
     bias = float(np.mean(p - y))
 
     print("\n样本内一致性（n=%d）" % len(df))
-    print("  RMSE = %.4f   MAE = %.4f   R² = %.4f" % (rmse, mae, r2))
+    print("  RMSE = %.4f   MAE = %.4f   R^2 = %.4f" % (rmse, mae, r2))
     print("  预测/真实相关系数 = %.4f   平均偏差(预测-真实) = %+.4f" % (corr, bias))
-    print("  → log10 尺度上 0.1 的偏差≈票房相差 %.0f%%" % ((10 ** 0.1 - 1) * 100))
+    print("  log10 尺度上 0.1 的偏差约等于票房相差 %.0f%%" % ((10 ** 0.1 - 1) * 100))
 
     ok = corr > 0.9 and abs(bias) < 0.15
     print("\n判定：%s（相关性>0.9 且无系统性偏移）" % ("PASS" if ok else "FAIL"))

@@ -56,6 +56,7 @@
 import { mapGetters, mapState } from 'vuex'
 import Pagination from '@/components/Pagination'
 import videoApi from '@/api/video'
+import { ElMessageBox } from 'element-plus'
 
 export default {
   components: { Pagination },
@@ -86,14 +87,22 @@ export default {
         this.listLoading = false
       })
     },
-    deleteVideo (row) {
-      let _this = this
+    async deleteVideo (row) {
+      try {
+        await ElMessageBox.confirm(`确定删除「${row.videoName}」吗？删除后无法恢复。`, '删除视频', {
+          confirmButtonText: '删除',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
+      } catch (e) {
+        return
+      }
       videoApi.deleteVideo(row.videoId).then(re => {
         if (re.code === 1) {
-          _this.search()
-          _this.$message.success(re.message)
+          this.search()
+          this.$message.success(re.message)
         } else {
-          _this.$message.error(re.message)
+          this.$message.error(re.message)
         }
       })
     },

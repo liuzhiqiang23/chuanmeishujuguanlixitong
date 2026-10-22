@@ -10,8 +10,8 @@
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" auto-complete="on" label-position="left">
 
       <div class="title-container anim-item anim-1">
-        <span class="eyebrow">MEDIA DATA PLATFORM</span>
-        <h3 class="title">传媒数据管理与分析系统</h3>
+        <span class="eyebrow">MOVIE BOX OFFICE PLATFORM</span>
+        <h3 class="title">电影票房分析与预测系统</h3>
         <p class="subtitle">数据洞察，从一次登录开始</p>
       </div>
 
@@ -58,7 +58,7 @@
 
       <el-button :loading="loading" type="primary" class="login-btn anim-item anim-5" @click.prevent="handleLogin">登 录</el-button>
 
-      <p class="footer-note anim-item anim-6">Media Data Management &amp; Analysis System</p>
+      <p class="footer-note anim-item anim-6">Movie Box Office Analysis &amp; Prediction System</p>
 
     </el-form>
 

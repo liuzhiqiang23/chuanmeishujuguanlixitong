@@ -24,7 +24,7 @@ export default {
   },
   data () {
     return {
-      title: '传媒数据管理与分析系统'
+      title: '电影票房分析与预测系统'
     }
   }
 }

@@ -107,17 +107,17 @@ export default {
     this.echartsUserAction = echarts.init(document.getElementById('echarts-moth-user'), 'movie-cyan')
     // eslint-disable-next-line no-undef
     this.echartsQuestion = echarts.init(document.getElementById('echarts-moth-question'), 'movie-cyan')
-    let _this = this
     this.loading = true
     dashboardApi.index().then(re => {
       let response = re.response
-      _this.newUserCount = response.newUserCount
-      _this.doPlayVideoCount = response.doPlayVideoCount
-      _this.newVideoCount = response.newVideoCount
-      _this.hotVideoCount = response.hotVideoCount
-      _this.heatTopList = response.heatTopList || []
-      _this.echartsUserAction.setOption(this.option('用户活跃度', '{b}日{c}度', response.mothDayText, response.mothDayUserActionValue))
-      _this.echartsQuestion.setOption(this.option('视频月播放次数', '{b}日{c}题', response.mothDayText, response.mothDayVideoPlayValue))
+      this.newUserCount = response.newUserCount
+      this.doPlayVideoCount = response.doPlayVideoCount
+      this.newVideoCount = response.newVideoCount
+      this.hotVideoCount = response.hotVideoCount
+      this.heatTopList = response.heatTopList || []
+      this.echartsUserAction.setOption(this.option('用户活跃度', '{b}日{c}度', response.mothDayText, response.mothDayUserActionValue))
+      this.echartsQuestion.setOption(this.option('视频月播放次数', '{b}日{c}题', response.mothDayText, response.mothDayVideoPlayValue))
+    }).finally(() => {
       this.loading = false
     })
   },
