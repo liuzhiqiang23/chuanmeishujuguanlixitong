@@ -32,31 +32,39 @@ const request = function (loadtip, query) {
       background: 'rgba(0, 0, 0, 0.5)'
     })
   }
+  // 业务码统一分发（HTTP 200 时）：401/业务502 回登录页，500/501 原样 reject 交给调用方
+  const dispatch = body => {
+    if (body && body.code === 401) {
+      router.push({ path: '/login' })
+      return Promise.reject(body)
+    } else if (body && body.code === 502) {
+      router.push({ path: '/login' })
+      return Promise.reject(body)
+    } else if (body && (body.code === 500 || body.code === 501)) {
+      return Promise.reject(body)
+    }
+    return Promise.resolve(body)
+  }
   return axios.request(query)
-    .then(res => {
-      if (loadtip) {
-        loading.close()
-      }
-      if (res.data.code === 401) {
-        router.push({ path: '/login' })
-        return Promise.reject(res.data)
-      } else if (res.data.code === 500) {
-        return Promise.reject(res.data)
-      } else if (res.data.code === 501) {
-        return Promise.reject(res.data)
-      } else if (res.data.code === 502) {
-        router.push({ path: '/login' })
-        return Promise.reject(res.data)
-      } else {
-        return Promise.resolve(res.data)
-      }
-    })
+    .then(res => dispatch(res.data))
     .catch(e => {
+      // HTTP 层异常（非 2xx）与成功走同一套 response.data 解析：
+      // 仅 HTTP 401 回登录页；403 等展示服务端可读消息；不把业务 502 误当 HTTP 处理
+      const body = e && e.response && e.response.data
+      const status = e && e.response ? e.response.status : undefined
+      if (status === 401) {
+        router.push({ path: '/login' })
+      } else if (body && body.message) {
+        ElMessage.error(body.message)
+      } else if (!body) {
+        ElMessage.error(e.message || '请求失败')
+      }
+      return Promise.reject(body || e)
+    })
+    .finally(() => {
       if (loadtip) {
         loading.close()
       }
-      ElMessage.error(e.message)
-      return Promise.reject(e.message)
     })
 }
 
