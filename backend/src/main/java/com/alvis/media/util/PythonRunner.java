@@ -66,6 +66,10 @@ public class PythonRunner {
             if (!finished) {
                 process.destroyForcibly();
                 joinGobbler(outputGobbler, 2000);
+                if (outputGobbler.isAlive()) {
+                    // join 超时仍未收尾：与正常分支同口径，不并发读 StringBuilder
+                    throw new IllegalStateException("算法脚本执行超时（" + timeoutSeconds + " 秒），输出未完全收集");
+                }
                 throw new IllegalStateException("算法脚本执行超时（" + timeoutSeconds + " 秒）：" + sb);
             }
             joinGobbler(outputGobbler, 5000);
