@@ -53,22 +53,29 @@ public class PythonRunner {
             }
         });
         outputGobbler.setDaemon(true);
-        outputGobbler.start();
-
-        boolean finished = process.waitFor(timeoutSeconds, TimeUnit.SECONDS);
-        if (!finished) {
-            process.destroyForcibly();
-            try {
-                outputGobbler.join(2000);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-            throw new IllegalStateException("算法脚本执行超时（" + timeoutSeconds + " 秒）：" + sb);
-        }
         try {
-            outputGobbler.join(5000);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+            outputGobbler.start();
+            boolean finished;
+            try {
+                finished = process.waitFor(timeoutSeconds, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                // 调用线程被取消：子进程必须一并终止，否则算法脚本会泄漏存活
+                Thread.currentThread().interrupt();
+                throw new IllegalStateException("算法脚本执行被取消（已强制结束子进程）");
+            }
+            if (!finished) {
+                process.destroyForcibly();
+                joinGobbler(outputGobbler, 2000);
+                throw new IllegalStateException("算法脚本执行超时（" + timeoutSeconds + " 秒）：" + sb);
+            }
+            joinGobbler(outputGobbler, 5000);
+            if (outputGobbler.isAlive()) {
+                // join 超时说明输出仍未收集完：不再并发读 StringBuilder，按收集失败处理
+                throw new IllegalStateException("算法脚本已退出但输出收集未完成（输出可能过大）");
+            }
+        } finally {
+            // 兜底任何出口（含被取消路径）都终结子进程；对已退出进程是 no-op
+            process.destroyForcibly();
         }
         if (process.exitValue() != 0 && sb.indexOf("{\"error\"") < 0) {
             throw new IllegalStateException("算法脚本异常退出（code " + process.exitValue() + "）：" + sb);
@@ -99,5 +106,13 @@ public class PythonRunner {
             throw new IllegalStateException(root.path("error").asText());
         }
         return root;
+    }
+
+    private static void joinGobbler(Thread gobbler, long millis) {
+        try {
+            gobbler.join(millis);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 }
