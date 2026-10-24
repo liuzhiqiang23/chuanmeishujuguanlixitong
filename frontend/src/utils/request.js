@@ -6,7 +6,9 @@ let csrfTokenPromise
 
 const getCsrfToken = () => {
   if (!csrfTokenPromise) {
-    csrfTokenPromise = axios.get(`${import.meta.env.VITE_APP_URL}/api/csrf`, {
+    // 显式相对路径：不能拼接 VITE_APP_URL——生产构建无 .env 时它是 undefined，
+    // 会变成 "undefined/api/csrf" 导致令牌预取永远失败（曾被旧 ErrorController 的 HTTP 200 掩盖）
+    csrfTokenPromise = axios.get('/api/csrf', {
       withCredentials: true,
       timeout: 30000
     }).then(res => res.data.token).finally(() => {
