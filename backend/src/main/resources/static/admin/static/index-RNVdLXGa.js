@@ -1,1 +1,0 @@
-import{_ as c,c as o,o as a}from"./index-Cdc7_SNW.js";const s={name:"Redirect",created(){const{params:e,query:t}=this.$route,{path:r}=e;this.$router.replace({path:"/"+r,query:t})}};function n(e,t,r,p,i,_){return a(),o("div")}const u=c(s,[["render",n]]);export{u as default};

@@ -38,19 +38,37 @@ public class PythonRunner {
         pb.redirectErrorStream(true);
         Process process = pb.start();
 
+        // 输出读取必须放独立线程：readLine() 只在子进程关闭 stdout（退出）时返回，
+        // 若在主线程同步读，脚本挂起不退出时会永久阻塞在读循环，waitFor 的超时永远轮不到
         StringBuilder sb = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                sb.append(line).append('\n');
+        Thread outputGobbler = new Thread(() -> {
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line).append('\n');
+                }
+            } catch (Exception ignored) {
+                // 进程被超时强杀时流会异常关闭，输出以已读到的部分为准
             }
-        }
+        });
+        outputGobbler.setDaemon(true);
+        outputGobbler.start();
 
         boolean finished = process.waitFor(timeoutSeconds, TimeUnit.SECONDS);
         if (!finished) {
             process.destroyForcibly();
-            throw new IllegalStateException("算法脚本执行超时（" + timeoutSeconds + " 秒）");
+            try {
+                outputGobbler.join(2000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            throw new IllegalStateException("算法脚本执行超时（" + timeoutSeconds + " 秒）：" + sb);
+        }
+        try {
+            outputGobbler.join(5000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
         if (process.exitValue() != 0 && sb.indexOf("{\"error\"") < 0) {
             throw new IllegalStateException("算法脚本异常退出（code " + process.exitValue() + "）：" + sb);

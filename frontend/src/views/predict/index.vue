@@ -7,7 +7,7 @@
           <template #header>
             <div class="card-header">
               <span class="card-title">电影票房预测</span>
-              <el-tag size="small" type="success">服务模型：{{ serveModel }}（离线训练，毫秒级返回）</el-tag>
+              <el-tag size="small" type="success">服务模型：{{ serveModel }}（离线训练，首次加载需数秒）</el-tag>
               <el-button type="text" @click="$router.push('/predict/compare')">查看 8 算法对比 →</el-button>
             </div>
           </template>
@@ -155,7 +155,7 @@
           </el-form>
 
           <el-alert v-if="batchResult" type="success" :closable="false" show-icon class="mt8"
-                    :title="'本次完成 ' + batchResult.predicted + ' 条，耗时 ' + batchResult.seconds + ' 秒，'
+                    :title="'本次完成 ' + batchResult.total + ' 条，耗时 ' + batchResult.seconds + ' 秒，'
                       + '落库 ' + batchResult.logRows + ' 条；平均预测票房 ' + formatMoney(batchResult.avgRevenue)" />
 
           <el-table v-loading="logsLoading" :data="logs" border fit size="small" class="mt12">

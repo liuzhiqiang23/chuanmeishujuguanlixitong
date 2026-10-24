@@ -14,11 +14,21 @@ import time
 
 import requests
 
-BASE = "http://127.0.0.1:8000"
+BASE = os.environ.get("MOVIE_BASE_URL", "http://127.0.0.1:8000").rstrip("/")
 ADMIN_USER = os.environ.get("MOVIE_ADMIN_USER")
 ADMIN_PASS = os.environ.get("MOVIE_ADMIN_PASS")
 
 results = []
+
+
+class CsrfSession(requests.Session):
+    def request(self, method, url, **kwargs):
+        if method.upper() not in ("GET", "HEAD", "OPTIONS"):
+            token_response = super().request("GET", BASE + "/api/csrf", timeout=10)
+            token_response.raise_for_status()
+            self.headers["X-XSRF-TOKEN"] = token_response.json()["token"]
+            self.headers["Origin"] = BASE
+        return super().request(method, url, **kwargs)
 
 
 def check(name, method, path, resp, ok_extra=None, evidence=None, expect_code=1):
@@ -55,7 +65,7 @@ def main():
     if not ADMIN_USER or not ADMIN_PASS:
         print("Set MOVIE_ADMIN_USER and MOVIE_ADMIN_PASS before running this check.")
         return 2
-    s = requests.Session()
+    s = CsrfSession()
     s.headers.update({"Content-Type": "application/json", "request-ajax": "true"})
 
     # ---------- 1. 登录（Cookie 会话）----------
@@ -233,7 +243,7 @@ def main():
               % (i, x["name"], x["call"], x["http"], x["code"],
                  "PASS" if x["pass"] else "FAIL", x["evidence"]))
 
-    with open("tools/verify_all_result.json", "w", encoding="utf-8") as f:
+    with open(os.path.join(os.path.dirname(__file__), "verify_all_result.json"), "w", encoding="utf-8") as f:
         json.dump({"passed": ok, "total": len(results), "items": results},
                   f, ensure_ascii=False, indent=2)
     print("\n明细已写入 tools/verify_all_result.json")

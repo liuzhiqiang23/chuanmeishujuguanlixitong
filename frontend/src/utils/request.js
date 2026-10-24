@@ -9,9 +9,8 @@ const getCsrfToken = () => {
     csrfTokenPromise = axios.get(`${import.meta.env.VITE_APP_URL}/api/csrf`, {
       withCredentials: true,
       timeout: 30000
-    }).then(res => res.data.token).catch(error => {
+    }).then(res => res.data.token).finally(() => {
       csrfTokenPromise = undefined
-      throw error
     })
   }
   return csrfTokenPromise

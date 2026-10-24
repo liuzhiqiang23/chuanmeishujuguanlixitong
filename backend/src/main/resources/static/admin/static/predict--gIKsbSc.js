@@ -1,1 +1,0 @@
-import{z as t,p as a}from"./index-Cdc7_SNW.js";const o={predict:p=>a("/api/predict",p),batch:p=>a("/api/predict/batch",p),logs:p=>a("/api/predict/logs",p),algoCompare:()=>t("/api/predict/algo-compare")};export{o as p};
