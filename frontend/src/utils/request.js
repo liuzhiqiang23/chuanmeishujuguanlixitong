@@ -11,7 +11,18 @@ const getCsrfToken = () => {
     csrfTokenPromise = axios.get('/api/csrf', {
       withCredentials: true,
       timeout: 30000
-    }).then(res => res.data.token).finally(() => {
+    }).then(res => {
+      const token = res.data && res.data.token
+      if (!token) {
+        // 拿不到令牌视为失败：不得带着空令牌发业务请求
+        throw new Error('CSRF 令牌为空')
+      }
+      return token
+    }).catch(e => {
+      // 预取失败必须可见：提示一次、清缓存允许下次重试；否则业务请求会被静默吞掉
+      ElMessage.error('安全令牌获取失败，请重试')
+      throw e
+    }).finally(() => {
       csrfTokenPromise = undefined
     })
   }
